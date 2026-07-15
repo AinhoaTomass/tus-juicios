@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(flutter run*)",
+      "Bash(nohup flutter run*)",
+      "Bash(flutter emulators*)"
+    ]
+  }
+}
