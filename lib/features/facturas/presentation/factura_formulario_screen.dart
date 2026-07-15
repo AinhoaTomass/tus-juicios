@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/state/formulario_sucio_provider.dart';
+import '../../../core/widgets/confirmar_salida_dialog.dart';
 import '../../clientes/presentation/clientes_providers.dart';
 import '../domain/factura.dart';
 import 'facturas_providers.dart';
@@ -22,9 +24,20 @@ class _FacturaFormularioScreenState extends ConsumerState<FacturaFormularioScree
   final _importeCtrl = TextEditingController();
   final _conceptoCtrl = TextEditingController();
   String? _clienteId;
+  String? _clienteError;
   EstadoFactura _estado = EstadoFactura.pendiente;
   DateTime _fecha = DateTime.now();
   bool _cargado = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => ref.read(formularioSucioProvider.notifier).limpiar(),
+    );
+  }
+
+  void _marcarSucio() => ref.read(formularioSucioProvider.notifier).marcar();
 
   @override
   void dispose() {
@@ -52,11 +65,15 @@ class _FacturaFormularioScreenState extends ConsumerState<FacturaFormularioScree
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (fecha != null) setState(() => _fecha = fecha);
+    if (fecha != null) {
+      setState(() => _fecha = fecha);
+      _marcarSucio();
+    }
   }
 
   Future<void> _guardar() async {
-    if (!_formKey.currentState!.validate()) return;
+    setState(() => _clienteError = _clienteId == null ? 'Obligatorio' : null);
+    if (!_formKey.currentState!.validate() || _clienteId == null) return;
 
     final repo = ref.read(facturaRepositoryProvider);
     final factura = Factura(
@@ -76,6 +93,7 @@ class _FacturaFormularioScreenState extends ConsumerState<FacturaFormularioScree
     }
 
     ref.invalidate(facturasListaProvider);
+    ref.read(formularioSucioProvider.notifier).limpiar();
     if (mounted) context.pop();
   }
 
@@ -100,74 +118,111 @@ class _FacturaFormularioScreenState extends ConsumerState<FacturaFormularioScree
 
   Widget _buildForm(BuildContext context, bool esEdicion) {
     final clientesAsync = ref.watch(clientesListaProvider);
+    final sucio = ref.watch(formularioSucioProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(esEdicion ? 'Editar factura' : 'Nueva factura')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _numeroCtrl,
-              decoration: const InputDecoration(labelText: 'Número'),
-              validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
-            ),
-            const SizedBox(height: 16),
-            clientesAsync.when(
-              loading: () => const LinearProgressIndicator(),
-              error: (error, _) => Text('Error al cargar clientes: $error'),
-              data: (clientes) => DropdownButtonFormField<String>(
-                initialValue: _clienteId,
-                decoration: const InputDecoration(labelText: 'Cliente'),
-                items: clientes
-                    .map((c) => DropdownMenuItem(value: c.id, child: Text(c.nombre)))
-                    .toList(),
-                onChanged: (value) => setState(() => _clienteId = value),
-                validator: (value) => value == null ? 'Obligatorio' : null,
+    return PopScope(
+      canPop: !sucio,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final salir = await confirmarSalirSinGuardar(context);
+        if (salir && context.mounted) {
+          ref.read(formularioSucioProvider.notifier).limpiar();
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: Text(esEdicion ? 'Editar factura' : 'Nueva factura')),
+        body: Form(
+          key: _formKey,
+          onChanged: _marcarSucio,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextFormField(
+                controller: _numeroCtrl,
+                decoration: const InputDecoration(labelText: 'Número'),
+                validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
               ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _importeCtrl,
-              decoration: const InputDecoration(labelText: 'Importe (€)'),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              validator: (value) {
-                if (value == null || value.isEmpty) return 'Obligatorio';
-                return double.tryParse(value.replaceAll(',', '.')) == null
-                    ? 'Debe ser un número'
-                    : null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _conceptoCtrl,
-              decoration: const InputDecoration(labelText: 'Concepto'),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            SegmentedButton<EstadoFactura>(
-              segments: const [
-                ButtonSegment(value: EstadoFactura.pendiente, label: Text('Pendiente')),
-                ButtonSegment(value: EstadoFactura.pagada, label: Text('Pagada')),
-                ButtonSegment(value: EstadoFactura.vencida, label: Text('Vencida')),
-              ],
-              selected: {_estado},
-              onSelectionChanged: (seleccion) => setState(() => _estado = seleccion.first),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Fecha'),
-              subtitle: Text('${_fecha.day}/${_fecha.month}/${_fecha.year}'),
-              trailing: IconButton(
-                icon: const Icon(Icons.calendar_today_outlined),
-                onPressed: _seleccionarFecha,
+              const SizedBox(height: 16),
+              clientesAsync.when(
+                loading: () => const LinearProgressIndicator(),
+                error: (error, _) => Text('Error al cargar clientes: $error'),
+                data: (clientes) => DropdownMenu<String>(
+                  expandedInsets: EdgeInsets.zero,
+                  initialSelection: _clienteId,
+                  label: const Text('Cliente'),
+                  errorText: _clienteError,
+                  dropdownMenuEntries: clientes
+                      .map((c) => DropdownMenuEntry(value: c.id, label: c.nombre))
+                      .toList(),
+                  onSelected: (value) {
+                    setState(() {
+                      _clienteId = value;
+                      _clienteError = null;
+                    });
+                    _marcarSucio();
+                  },
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
-          ],
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _importeCtrl,
+                decoration: const InputDecoration(labelText: 'Importe (€)'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Obligatorio';
+                  return double.tryParse(value.replaceAll(',', '.')) == null
+                      ? 'Debe ser un número'
+                      : null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _conceptoCtrl,
+                decoration: const InputDecoration(labelText: 'Concepto'),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 16),
+              SegmentedButton<EstadoFactura>(
+                showSelectedIcon: false,
+                segments: const [
+                  ButtonSegment(value: EstadoFactura.pendiente, label: Text('Pendiente')),
+                  ButtonSegment(value: EstadoFactura.pagada, label: Text('Pagada')),
+                  ButtonSegment(value: EstadoFactura.vencida, label: Text('Vencida')),
+                ],
+                selected: {_estado},
+                onSelectionChanged: (seleccion) {
+                  setState(() => _estado = seleccion.first);
+                  _marcarSucio();
+                },
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Fecha'),
+                subtitle: Text('${_fecha.day}/${_fecha.month}/${_fecha.year}'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.calendar_today_outlined),
+                  onPressed: _seleccionarFecha,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => context.pop(),
+                      child: const Text('Cancelar'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -22,8 +22,12 @@ class EstadoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = _color;
+    final estilo = Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        );
     return Chip(
-      label: Text(label, style: TextStyle(color: color, fontSize: 12)),
+      label: Text(label, style: estilo),
       side: BorderSide(color: color, width: 1),
       backgroundColor: Colors.transparent,
       visualDensity: VisualDensity.compact,

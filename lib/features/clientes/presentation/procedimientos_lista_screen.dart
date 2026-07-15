@@ -42,6 +42,7 @@ class _ProcedimientosListaScreenState extends ConsumerState<ProcedimientosListaS
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: SegmentedButton<EstadoProcedimiento?>(
+                  showSelectedIcon: false,
                   segments: const [
                     ButtonSegment(value: null, label: Text('Todos')),
                     ButtonSegment(value: EstadoProcedimiento.activo, label: Text('Activo')),

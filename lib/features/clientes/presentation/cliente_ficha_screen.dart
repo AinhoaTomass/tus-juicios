@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
 import '../domain/cliente.dart';
@@ -24,15 +25,7 @@ class ClienteFichaScreen extends ConsumerWidget {
     final clienteAsync = ref.watch(clientePorIdProvider(clienteId));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ficha de cliente'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () => context.go('/clientes/$clienteId/editar'),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Ficha de cliente')),
       body: clienteAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error al cargar el cliente: $error')),
@@ -43,20 +36,35 @@ class ClienteFichaScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(cliente.nombre, style: Theme.of(context).textTheme.headlineSmall),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          cliente.nombre,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                      ),
+                      if (cliente.esUrgente)
+                        const EstadoChip(label: 'Urgente', tono: EstadoTono.urgente),
+                    ],
+                  ),
                   const SizedBox(height: 4),
-                  Text(cliente.nifCif, style: Theme.of(context).textTheme.bodyMedium),
-                  const SizedBox(height: 12),
-                  if (cliente.esUrgente) ...[
-                    const SizedBox(height: 8),
-                    const EstadoChip(label: 'Urgente', tono: EstadoTono.urgente),
-                  ],
+                  Text(
+                    '${cliente.nifCif} · '
+                    '${cliente.tipo == TipoCliente.fisica ? 'FÍSICA' : 'JURÍDICA'}',
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelMedium
+                        ?.copyWith(color: AppTheme.accent),
+                  ),
                   if (cliente.resumen != null) ...[
                     const SizedBox(height: 12),
                     Text(cliente.resumen!),
                   ],
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 12),
                   if (cliente.telefono != null) ...[
-                    const SizedBox(height: 12),
                     Row(
                       children: [
                         const Icon(Icons.phone_outlined, size: 18),
@@ -64,9 +72,9 @@ class ClienteFichaScreen extends ConsumerWidget {
                         Text(cliente.telefono!),
                       ],
                     ),
+                    const SizedBox(height: 8),
                   ],
                   if (cliente.email != null) ...[
-                    const SizedBox(height: 8),
                     Row(
                       children: [
                         const Icon(Icons.email_outlined, size: 18),
@@ -74,9 +82,9 @@ class ClienteFichaScreen extends ConsumerWidget {
                         Text(cliente.email!),
                       ],
                     ),
+                    const SizedBox(height: 8),
                   ],
                   if (cliente.direccion != null) ...[
-                    const SizedBox(height: 8),
                     Row(
                       children: [
                         const Icon(Icons.location_on_outlined, size: 18),
@@ -84,9 +92,9 @@ class ClienteFichaScreen extends ConsumerWidget {
                         Expanded(child: Text(cliente.direccion!)),
                       ],
                     ),
-                  ],
-                  if (cliente.fechaVencimiento != null) ...[
                     const SizedBox(height: 8),
+                  ],
+                  if (cliente.fechaVencimiento != null)
                     Row(
                       children: [
                         const Icon(Icons.event_outlined, size: 18),
@@ -96,7 +104,6 @@ class ClienteFichaScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  ],
                   if (cliente.notas != null) ...[
                     const SizedBox(height: 12),
                     Text('Notas', style: Theme.of(context).textTheme.titleSmall),
@@ -107,17 +114,8 @@ class ClienteFichaScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Procedimientos', style: Theme.of(context).textTheme.titleMedium),
-                IconButton(
-                  icon: const Icon(Icons.add_circle_outline),
-                  tooltip: 'Nuevo procedimiento',
-                  onPressed: () => context.go('/clientes/$clienteId/procedimientos/nuevo'),
-                ),
-              ],
-            ),
+            Text('Procedimientos', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
             Consumer(
               builder: (context, ref, _) {
                 final procedimientosAsync = ref.watch(procedimientosDeClienteProvider(clienteId));
@@ -141,14 +139,31 @@ class ClienteFichaScreen extends ConsumerWidget {
                                 onTap: () => context.go(
                                   '/clientes/$clienteId/procedimientos/${p.id}/editar',
                                 ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(child: Text(p.nombre)),
-                                    EstadoChip(
-                                      label: p.estado.name,
-                                      tono: _tonoProcedimiento(p.estado),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            p.nombre,
+                                            style: Theme.of(context).textTheme.titleSmall,
+                                          ),
+                                        ),
+                                        EstadoChip(
+                                          label: p.estado.name,
+                                          tono: _tonoProcedimiento(p.estado),
+                                        ),
+                                      ],
                                     ),
+                                    if (p.fechaMeta != null) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Vence ${p.fechaMeta!.day}/${p.fechaMeta!.month}',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -161,6 +176,28 @@ class ClienteFichaScreen extends ConsumerWidget {
               },
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => context.go('/clientes/$clienteId/editar'),
+                  child: const Text('Editar'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => context.go('/clientes/$clienteId/procedimientos/nuevo'),
+                  child: const Text('Nuevo trámite'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

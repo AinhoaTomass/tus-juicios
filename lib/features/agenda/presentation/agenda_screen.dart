@@ -94,15 +94,17 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                         evento.clienteNombre ?? 'Cliente',
                                         style: Theme.of(context).textTheme.titleMedium,
                                       ),
-                                      if (evento.hora != null)
-                                        Text(
-                                          evento.hora!,
-                                          style: Theme.of(context).textTheme.bodySmall,
-                                        ),
                                       if (evento.descripcion != null) ...[
                                         const SizedBox(height: 4),
                                         Text(
                                           evento.descripcion!,
+                                          style: Theme.of(context).textTheme.bodyMedium,
+                                        ),
+                                      ],
+                                      if (evento.hora != null) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          evento.hora!,
                                           style: Theme.of(context).textTheme.bodySmall,
                                         ),
                                       ],

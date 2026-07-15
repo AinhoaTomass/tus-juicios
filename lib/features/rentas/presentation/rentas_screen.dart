@@ -2,14 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estado_chip.dart';
+import '../../../core/widgets/filtro_chips.dart';
 import '../../../core/widgets/hairline_card.dart';
+import '../../../core/widgets/stat_tile.dart';
 import '../data/renta_mapper.dart';
 import '../domain/renta.dart';
 import 'rentas_providers.dart';
 
-class RentasScreen extends ConsumerWidget {
+class RentasScreen extends ConsumerStatefulWidget {
   const RentasScreen({super.key});
+
+  @override
+  ConsumerState<RentasScreen> createState() => _RentasScreenState();
+}
+
+class _RentasScreenState extends ConsumerState<RentasScreen> {
+  EstadoRenta? _filtro;
 
   EstadoTono _tono(EstadoRenta estado) => switch (estado) {
         EstadoRenta.enCurso => EstadoTono.aviso,
@@ -18,54 +28,127 @@ class RentasScreen extends ConsumerWidget {
       };
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final rentasAsync = ref.watch(rentasListaProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Rentas')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/rentas/nuevo'),
-        child: const Icon(Icons.add),
-      ),
       body: rentasAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error al cargar rentas: $error')),
         data: (rentas) {
-          if (rentas.isEmpty) {
-            return const Center(child: Text('Todavía no hay rentas registradas.'));
-          }
+          final anio = DateTime.now().year;
+          final filtradas =
+              _filtro == null ? rentas : rentas.where((r) => r.estado == _filtro).toList();
+
           return RefreshIndicator(
             onRefresh: () => ref.read(rentasListaProvider.notifier).refrescar(),
-            child: ListView.separated(
+            child: ListView(
               padding: const EdgeInsets.all(16),
-              itemCount: rentas.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final renta = rentas[index];
-                return HairlineCard(
-                  onTap: () => context.go('/rentas/${renta.id}/editar'),
-                  child: Row(
-                    children: [
-                      Expanded(
+              children: [
+                StatTileGrid(
+                  tiles: [
+                    StatTile(
+                      valor: rentas.where((r) => r.ejercicio == anio).length.toString(),
+                      etiqueta: 'Rentas $anio',
+                    ),
+                    StatTile(
+                      valor: rentas
+                          .where((r) => r.estado == EstadoRenta.presentada)
+                          .length
+                          .toString(),
+                      etiqueta: 'Presentadas',
+                    ),
+                    StatTile(
+                      valor: rentas
+                          .where((r) => r.estado == EstadoRenta.enCurso)
+                          .length
+                          .toString(),
+                      etiqueta: 'En curso',
+                    ),
+                    StatTile(
+                      valor: rentas
+                          .where((r) => r.estado == EstadoRenta.pendienteDatos)
+                          .length
+                          .toString(),
+                      etiqueta: 'Pend. de datos',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                FiltroChips<EstadoRenta?>(
+                  opciones: const [
+                    (null, 'Todas'),
+                    (EstadoRenta.enCurso, 'En curso'),
+                    (EstadoRenta.presentada, 'Presentadas'),
+                    (EstadoRenta.pendienteDatos, 'Pend. de datos'),
+                  ],
+                  seleccion: _filtro,
+                  onChanged: (valor) => setState(() => _filtro = valor),
+                ),
+                const SizedBox(height: 16),
+                if (filtradas.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: Text('No hay rentas en este filtro.')),
+                  )
+                else
+                  ...filtradas.map(
+                    (renta) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: HairlineCard(
+                        onTap: () => context.go('/rentas/${renta.id}/editar'),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              renta.clienteNombre ?? 'Cliente',
-                              style: Theme.of(context).textTheme.titleMedium,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    renta.clienteNombre ?? 'Cliente',
+                                    style: Theme.of(context).textTheme.titleMedium,
+                                  ),
+                                ),
+                                EstadoChip(
+                                  label: renta.estado.etiqueta,
+                                  tono: _tono(renta.estado),
+                                ),
+                              ],
                             ),
+                            const SizedBox(height: 4),
                             Text(
-                              'Ejercicio ${renta.ejercicio}',
-                              style: Theme.of(context).textTheme.bodySmall,
+                              'RENTA ${renta.ejercicio}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(color: AppTheme.accent),
                             ),
+                            if (renta.resultado != null) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                'Resultado: ${renta.resultado}',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                            if (renta.fecha != null) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                '${renta.estado == EstadoRenta.presentada ? 'Presentada' : 'Límite'} '
+                                '${renta.fecha!.day}/${renta.fecha!.month}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
                           ],
                         ),
                       ),
-                      EstadoChip(label: renta.estado.etiqueta, tono: _tono(renta.estado)),
-                    ],
+                    ),
                   ),
-                );
-              },
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => context.go('/rentas/nuevo'),
+                  child: const Text('Nueva renta'),
+                ),
+              ],
             ),
           );
         },

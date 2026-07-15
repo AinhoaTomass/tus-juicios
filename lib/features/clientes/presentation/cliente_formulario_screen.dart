@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/state/formulario_sucio_provider.dart';
+import '../../../core/widgets/confirmar_salida_dialog.dart';
 import '../domain/cliente.dart';
 import 'clientes_providers.dart';
 
@@ -27,6 +29,16 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
   TipoCliente _tipo = TipoCliente.fisica;
   DateTime? _fechaVencimiento;
   bool _cargado = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => ref.read(formularioSucioProvider.notifier).limpiar(),
+    );
+  }
+
+  void _marcarSucio() => ref.read(formularioSucioProvider.notifier).marcar();
 
   @override
   void dispose() {
@@ -61,7 +73,10 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (fecha != null) setState(() => _fechaVencimiento = fecha);
+    if (fecha != null) {
+      setState(() => _fechaVencimiento = fecha);
+      _marcarSucio();
+    }
   }
 
   Future<void> _guardar() async {
@@ -88,6 +103,7 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
     }
 
     ref.invalidate(clientesListaProvider);
+    ref.read(formularioSucioProvider.notifier).limpiar();
     if (mounted) context.pop();
   }
 
@@ -111,10 +127,22 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
   }
 
   Widget _buildForm(BuildContext context, bool esEdicion) {
-    return Scaffold(
+    final sucio = ref.watch(formularioSucioProvider);
+    return PopScope(
+      canPop: !sucio,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final salir = await confirmarSalirSinGuardar(context);
+        if (salir && context.mounted) {
+          ref.read(formularioSucioProvider.notifier).limpiar();
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(title: Text(esEdicion ? 'Editar cliente' : 'Nuevo cliente')),
       body: Form(
         key: _formKey,
+        onChanged: _marcarSucio,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -131,12 +159,16 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
             ),
             const SizedBox(height: 16),
             SegmentedButton<TipoCliente>(
+              showSelectedIcon: false,
               segments: const [
                 ButtonSegment(value: TipoCliente.fisica, label: Text('Física')),
                 ButtonSegment(value: TipoCliente.juridica, label: Text('Jurídica')),
               ],
               selected: {_tipo},
-              onSelectionChanged: (seleccion) => setState(() => _tipo = seleccion.first),
+              onSelectionChanged: (seleccion) {
+                setState(() => _tipo = seleccion.first);
+                _marcarSucio();
+              },
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -186,14 +218,34 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
                   if (_fechaVencimiento != null)
                     IconButton(
                       icon: const Icon(Icons.clear),
-                      onPressed: () => setState(() => _fechaVencimiento = null),
+                      onPressed: () {
+                        setState(() => _fechaVencimiento = null);
+                        _marcarSucio();
+                      },
                     ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => context.pop(),
+                    child: const Text('Cancelar'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _guardar,
+                    child: const Text('Guardar cliente'),
+                  ),
+                ),
+              ],
+            ),
           ],
+        ),
         ),
       ),
     );

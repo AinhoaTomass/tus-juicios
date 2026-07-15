@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/state/formulario_sucio_provider.dart';
+import '../../../core/widgets/confirmar_salida_dialog.dart';
 import '../domain/cliente.dart';
 import 'procedimientos_providers.dart';
 
@@ -30,6 +32,16 @@ class _ProcedimientoFormularioScreenState extends ConsumerState<ProcedimientoFor
   bool _cargado = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => ref.read(formularioSucioProvider.notifier).limpiar(),
+    );
+  }
+
+  void _marcarSucio() => ref.read(formularioSucioProvider.notifier).marcar();
+
+  @override
   void dispose() {
     _nombreCtrl.dispose();
     super.dispose();
@@ -50,7 +62,10 @@ class _ProcedimientoFormularioScreenState extends ConsumerState<ProcedimientoFor
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (fecha != null) setState(() => _fechaMeta = fecha);
+    if (fecha != null) {
+      setState(() => _fechaMeta = fecha);
+      _marcarSucio();
+    }
   }
 
   Future<void> _guardar() async {
@@ -73,6 +88,7 @@ class _ProcedimientoFormularioScreenState extends ConsumerState<ProcedimientoFor
 
     ref.invalidate(procedimientosDeClienteProvider(widget.clienteId));
     ref.invalidate(procedimientosListaProvider);
+    ref.read(formularioSucioProvider.notifier).limpiar();
     if (mounted) context.pop();
   }
 
@@ -98,55 +114,88 @@ class _ProcedimientoFormularioScreenState extends ConsumerState<ProcedimientoFor
   }
 
   Widget _buildForm(BuildContext context, bool esEdicion) {
-    return Scaffold(
-      appBar: AppBar(title: Text(esEdicion ? 'Editar procedimiento' : 'Nuevo procedimiento')),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _nombreCtrl,
-              decoration: const InputDecoration(labelText: 'Nombre'),
-              validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
-            ),
-            const SizedBox(height: 16),
-            SegmentedButton<EstadoProcedimiento>(
-              segments: const [
-                ButtonSegment(value: EstadoProcedimiento.activo, label: Text('Activo')),
-                ButtonSegment(value: EstadoProcedimiento.pendiente, label: Text('Pendiente')),
-                ButtonSegment(value: EstadoProcedimiento.cerrado, label: Text('Cerrado')),
-              ],
-              selected: {_estado},
-              onSelectionChanged: (seleccion) => setState(() => _estado = seleccion.first),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Fecha meta'),
-              subtitle: Text(
-                _fechaMeta == null
-                    ? 'Sin fecha'
-                    : '${_fechaMeta!.day}/${_fechaMeta!.month}/${_fechaMeta!.year}',
+    final sucio = ref.watch(formularioSucioProvider);
+    return PopScope(
+      canPop: !sucio,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final salir = await confirmarSalirSinGuardar(context);
+        if (salir && context.mounted) {
+          ref.read(formularioSucioProvider.notifier).limpiar();
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: Text(esEdicion ? 'Editar procedimiento' : 'Nuevo procedimiento')),
+        body: Form(
+          key: _formKey,
+          onChanged: _marcarSucio,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextFormField(
+                controller: _nombreCtrl,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+                validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
               ),
-              trailing: Wrap(
-                spacing: 4,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.calendar_today_outlined),
-                    onPressed: _seleccionarFechaMeta,
-                  ),
-                  if (_fechaMeta != null)
+              const SizedBox(height: 16),
+              SegmentedButton<EstadoProcedimiento>(
+                showSelectedIcon: false,
+                segments: const [
+                  ButtonSegment(value: EstadoProcedimiento.activo, label: Text('Activo')),
+                  ButtonSegment(value: EstadoProcedimiento.pendiente, label: Text('Pendiente')),
+                  ButtonSegment(value: EstadoProcedimiento.cerrado, label: Text('Cerrado')),
+                ],
+                selected: {_estado},
+                onSelectionChanged: (seleccion) {
+                  setState(() => _estado = seleccion.first);
+                  _marcarSucio();
+                },
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Fecha meta'),
+                subtitle: Text(
+                  _fechaMeta == null
+                      ? 'Sin fecha'
+                      : '${_fechaMeta!.day}/${_fechaMeta!.month}/${_fechaMeta!.year}',
+                ),
+                trailing: Wrap(
+                  spacing: 4,
+                  children: [
                     IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () => setState(() => _fechaMeta = null),
+                      icon: const Icon(Icons.calendar_today_outlined),
+                      onPressed: _seleccionarFechaMeta,
                     ),
+                    if (_fechaMeta != null)
+                      IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() => _fechaMeta = null);
+                          _marcarSucio();
+                        },
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => context.pop(),
+                      child: const Text('Cancelar'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
-          ],
+            ],
+          ),
         ),
       ),
     );

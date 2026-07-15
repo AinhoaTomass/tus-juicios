@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/hairline_card.dart';
 import 'notas_providers.dart';
 
@@ -14,44 +16,57 @@ class NotasScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Notas')),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/notas/nuevo'),
-        child: const Icon(Icons.add),
-      ),
       body: notasAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error al cargar notas: $error')),
         data: (notas) {
-          if (notas.isEmpty) {
-            return const Center(child: Text('Todavía no hay notas.'));
-          }
           return RefreshIndicator(
             onRefresh: () => ref.read(notasListaProvider.notifier).refrescar(),
-            child: ListView.separated(
+            child: ListView(
               padding: const EdgeInsets.all(16),
-              itemCount: notas.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final nota = notas[index];
-                return HairlineCard(
-                  onTap: () => context.go('/notas/${nota.id}/editar'),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(nota.titulo, style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${nota.fecha.day}/${nota.fecha.month}/${nota.fecha.year}',
-                        style: Theme.of(context).textTheme.bodySmall,
+              children: [
+                if (notas.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(child: Text('Todavía no hay notas.')),
+                  )
+                else
+                  ...notas.map(
+                    (nota) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: HairlineCard(
+                        onTap: () => context.go('/notas/${nota.id}/editar'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              DateFormat('d MMM', 'es_ES').format(nota.fecha).toUpperCase(),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(color: AppTheme.accent),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(nota.titulo, style: Theme.of(context).textTheme.titleMedium),
+                            if (nota.contenido != null) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                nota.contenido!,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
-                      if (nota.contenido != null) ...[
-                        const SizedBox(height: 8),
-                        Text(nota.contenido!, maxLines: 3, overflow: TextOverflow.ellipsis),
-                      ],
-                    ],
+                    ),
                   ),
-                );
-              },
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => context.go('/notas/nuevo'),
+                  child: const Text('Nueva nota'),
+                ),
+              ],
             ),
           );
         },
