@@ -1,7 +1,5 @@
 enum TipoCliente { fisica, juridica }
 
-enum EstadoCliente { activo, pendiente, cerrado }
-
 enum EstadoProcedimiento { activo, pendiente, cerrado }
 
 class Cliente {
@@ -10,7 +8,6 @@ class Cliente {
     required this.nombre,
     required this.nifCif,
     required this.tipo,
-    required this.estado,
     this.telefono,
     this.email,
     this.direccion,
@@ -24,7 +21,6 @@ class Cliente {
   final String nombre;
   final String nifCif;
   final TipoCliente tipo;
-  final EstadoCliente estado;
   final String? telefono;
   final String? email;
   final String? direccion;
@@ -33,9 +29,9 @@ class Cliente {
   final String? notas;
   final List<Procedimiento> procedimientos;
 
-  /// Urgente si el procedimiento no está cerrado y vence en <=3 días.
+  /// Urgente si vence en <=3 días.
   bool get esUrgente {
-    if (estado == EstadoCliente.cerrado || fechaVencimiento == null) return false;
+    if (fechaVencimiento == null) return false;
     final dias = fechaVencimiento!.difference(DateTime.now()).inDays;
     return dias <= 3;
   }
@@ -48,6 +44,7 @@ class Procedimiento {
     required this.nombre,
     required this.estado,
     this.fechaMeta,
+    this.clienteNombre,
   });
 
   final String id;
@@ -55,4 +52,7 @@ class Procedimiento {
   final String nombre;
   final EstadoProcedimiento estado;
   final DateTime? fechaMeta;
+
+  /// Solo relleno al leer el listado global (join con clientes); no se persiste.
+  final String? clienteNombre;
 }

@@ -25,7 +25,6 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
   final _resumenCtrl = TextEditingController();
   final _notasCtrl = TextEditingController();
   TipoCliente _tipo = TipoCliente.fisica;
-  EstadoCliente _estado = EstadoCliente.activo;
   DateTime? _fechaVencimiento;
   bool _cargado = false;
 
@@ -51,7 +50,6 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
     _resumenCtrl.text = cliente.resumen ?? '';
     _notasCtrl.text = cliente.notas ?? '';
     _tipo = cliente.tipo;
-    _estado = cliente.estado;
     _fechaVencimiento = cliente.fechaVencimiento;
     _cargado = true;
   }
@@ -75,7 +73,6 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
       nombre: _nombreCtrl.text.trim(),
       nifCif: _nifCtrl.text.trim(),
       tipo: _tipo,
-      estado: _estado,
       telefono: _telefonoCtrl.text.trim().isEmpty ? null : _telefonoCtrl.text.trim(),
       email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
       direccion: _direccionCtrl.text.trim().isEmpty ? null : _direccionCtrl.text.trim(),
@@ -140,16 +137,6 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
               ],
               selected: {_tipo},
               onSelectionChanged: (seleccion) => setState(() => _tipo = seleccion.first),
-            ),
-            const SizedBox(height: 16),
-            SegmentedButton<EstadoCliente>(
-              segments: const [
-                ButtonSegment(value: EstadoCliente.activo, label: Text('Activo')),
-                ButtonSegment(value: EstadoCliente.pendiente, label: Text('Pendiente')),
-                ButtonSegment(value: EstadoCliente.cerrado, label: Text('Cerrado')),
-              ],
-              selected: {_estado},
-              onSelectionChanged: (seleccion) => setState(() => _estado = seleccion.first),
             ),
             const SizedBox(height: 16),
             TextFormField(

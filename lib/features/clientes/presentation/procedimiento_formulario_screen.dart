@@ -72,6 +72,7 @@ class _ProcedimientoFormularioScreenState extends ConsumerState<ProcedimientoFor
     }
 
     ref.invalidate(procedimientosDeClienteProvider(widget.clienteId));
+    ref.invalidate(procedimientosListaProvider);
     if (mounted) context.pop();
   }
 

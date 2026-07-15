@@ -10,6 +10,21 @@ part 'procedimientos_providers.g.dart';
 ProcedimientoRepository procedimientoRepository(Ref ref) => ProcedimientoRepositorySupabase();
 
 @riverpod
+class ProcedimientosLista extends _$ProcedimientosLista {
+  @override
+  Future<List<Procedimiento>> build() {
+    return ref.watch(procedimientoRepositoryProvider).obtenerProcedimientos();
+  }
+
+  Future<void> refrescar() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(procedimientoRepositoryProvider).obtenerProcedimientos(),
+    );
+  }
+}
+
+@riverpod
 class ProcedimientosDeCliente extends _$ProcedimientosDeCliente {
   @override
   Future<List<Procedimiento>> build(String clienteId) {

@@ -8,6 +8,7 @@ import '../../features/clientes/presentation/cliente_ficha_screen.dart';
 import '../../features/clientes/presentation/cliente_formulario_screen.dart';
 import '../../features/clientes/presentation/clientes_lista_screen.dart';
 import '../../features/clientes/presentation/procedimiento_formulario_screen.dart';
+import '../../features/clientes/presentation/procedimientos_lista_screen.dart';
 import '../../features/facturas/presentation/factura_formulario_screen.dart';
 import '../../features/facturas/presentation/facturas_screen.dart';
 import '../../features/inicio/presentation/inicio_screen.dart';
@@ -38,6 +39,10 @@ GoRouter appRouter(Ref ref) {
     },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/procedimientos',
+        builder: (context, state) => const ProcedimientosListaScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(shell: shell),
         branches: [

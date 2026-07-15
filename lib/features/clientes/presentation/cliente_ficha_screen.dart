@@ -47,14 +47,10 @@ class ClienteFichaScreen extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(cliente.nifCif, style: Theme.of(context).textTheme.bodyMedium),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      EstadoChip(label: cliente.estado.name),
-                      if (cliente.esUrgente)
-                        const EstadoChip(label: 'Urgente', tono: EstadoTono.urgente),
-                    ],
-                  ),
+                  if (cliente.esUrgente) ...[
+                    const SizedBox(height: 8),
+                    const EstadoChip(label: 'Urgente', tono: EstadoTono.urgente),
+                  ],
                   if (cliente.resumen != null) ...[
                     const SizedBox(height: 12),
                     Text(cliente.resumen!),

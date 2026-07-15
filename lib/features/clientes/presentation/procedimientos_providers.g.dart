@@ -57,6 +57,53 @@ final class ProcedimientoRepositoryProvider
 String _$procedimientoRepositoryHash() =>
     r'2f5620ff0cccb9518f9515bb1f27f737c4b7e261';
 
+@ProviderFor(ProcedimientosLista)
+final procedimientosListaProvider = ProcedimientosListaProvider._();
+
+final class ProcedimientosListaProvider
+    extends $AsyncNotifierProvider<ProcedimientosLista, List<Procedimiento>> {
+  ProcedimientosListaProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'procedimientosListaProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$procedimientosListaHash();
+
+  @$internal
+  @override
+  ProcedimientosLista create() => ProcedimientosLista();
+}
+
+String _$procedimientosListaHash() =>
+    r'fa64eb3014ecf5c4d41d36ca7980db4255d78f13';
+
+abstract class _$ProcedimientosLista
+    extends $AsyncNotifier<List<Procedimiento>> {
+  FutureOr<List<Procedimiento>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<List<Procedimiento>>, List<Procedimiento>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<Procedimiento>>, List<Procedimiento>>,
+              AsyncValue<List<Procedimiento>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(ProcedimientosDeCliente)
 final procedimientosDeClienteProvider = ProcedimientosDeClienteFamily._();
 

@@ -4,17 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
-import '../domain/cliente.dart';
 import 'clientes_providers.dart';
 
 class ClientesListaScreen extends ConsumerWidget {
   const ClientesListaScreen({super.key});
-
-  EstadoTono _tonoPara(EstadoCliente estado) => switch (estado) {
-        EstadoCliente.activo => EstadoTono.exito,
-        EstadoCliente.pendiente => EstadoTono.aviso,
-        EstadoCliente.cerrado => EstadoTono.neutro,
-      };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,11 +48,7 @@ class ClientesListaScreen extends ConsumerWidget {
                         ),
                       ),
                       if (cliente.esUrgente)
-                        const Padding(
-                          padding: EdgeInsets.only(right: 8),
-                          child: EstadoChip(label: 'Urgente', tono: EstadoTono.urgente),
-                        ),
-                      EstadoChip(label: cliente.estado.name, tono: _tonoPara(cliente.estado)),
+                        const EstadoChip(label: 'Urgente', tono: EstadoTono.urgente),
                     ],
                   ),
                 );

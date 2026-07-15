@@ -11,6 +11,15 @@ class ProcedimientoRepositorySupabase implements ProcedimientoRepository {
   final SupabaseClient _client;
 
   @override
+  Future<List<Procedimiento>> obtenerProcedimientos() async {
+    final rows = await _client
+        .from('procedimientos')
+        .select('*, clientes(nombre)')
+        .order('created_at', ascending: false);
+    return rows.map((row) => row.toProcedimiento()).toList();
+  }
+
+  @override
   Future<List<Procedimiento>> obtenerProcedimientosDeCliente(String clienteId) async {
     final rows = await _client
         .from('procedimientos')

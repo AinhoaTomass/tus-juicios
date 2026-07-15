@@ -8,6 +8,7 @@ extension ProcedimientoMapper on Map<String, dynamic> {
         estado: EstadoProcedimiento.values.byName(this['estado'] as String),
         fechaMeta:
             this['fecha_meta'] == null ? null : DateTime.parse(this['fecha_meta'] as String),
+        clienteNombre: (this['clientes'] as Map<String, dynamic>?)?['nombre'] as String?,
       );
 }
 
