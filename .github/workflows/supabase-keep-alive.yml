@@ -11,5 +11,6 @@ jobs:
     steps:
       - name: Ping Supabase project
         run: |
-          curl -sf "https://ygnmtjhrgfkrtuwjrbdv.supabase.co/auth/v1/health" \
-            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlnbm10amhyZ2ZrcnR1d2pyYmR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMDM0NTUsImV4cCI6MjA5OTY3OTQ1NX0.io-rakMBqDJy1vQcx1lBSdvqqqtgLHysZanijmmwWg8"
+          curl -sf "https://ygnmtjhrgfkrtuwjrbdv.supabase.co/rest/v1/clientes?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlnbm10amhyZ2ZrcnR1d2pyYmR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMDM0NTUsImV4cCI6MjA5OTY3OTQ1NX0.io-rakMBqDJy1vQcx1lBSdvqqqtgLHysZanijmmwWg8" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlnbm10amhyZ2ZrcnR1d2pyYmR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMDM0NTUsImV4cCI6MjA5OTY3OTQ1NX0.io-rakMBqDJy1vQcx1lBSdvqqqtgLHysZanijmmwWg8"
