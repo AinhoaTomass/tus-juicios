@@ -1,0 +1,20 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#B68235" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+    <!-- shaft -->
+    <line x1="512" y1="248" x2="512" y2="785" />
+    <!-- beam -->
+    <line x1="290" y1="335" x2="734" y2="335" />
+    <!-- base -->
+    <line x1="410" y1="795" x2="614" y2="795" />
+    <!-- chains -->
+    <line x1="290" y1="335" x2="238" y2="468" />
+    <line x1="290" y1="335" x2="342" y2="468" />
+    <line x1="734" y1="335" x2="682" y2="468" />
+    <line x1="734" y1="335" x2="786" y2="468" />
+  </g>
+  <!-- finial -->
+  <circle cx="512" cy="220" r="28" fill="#B68235" />
+  <!-- pans -->
+  <path d="M238,468 A52,26 0 0 0 342,468 Z" fill="#B68235" />
+  <path d="M682,468 A52,26 0 0 0 786,468 Z" fill="#B68235" />
+</svg>
