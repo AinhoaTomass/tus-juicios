@@ -44,6 +44,30 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _recuperarContrasena() async {
+    final email = await showDialog<String>(
+      context: context,
+      builder: (context) => _DialogRecuperarContrasena(emailInicial: _emailCtrl.text.trim()),
+    );
+    if (email == null || email.isEmpty || !mounted) return;
+
+    try {
+      await supabase.auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'tusjuicios://reset-password',
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Te hemos enviado un email para restablecer la contraseña')),
+        );
+      }
+    } on AuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,12 +113,59 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                         : const Text('Entrar'),
                   ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: _cargando ? null : _recuperarContrasena,
+                    child: const Text('¿Olvidaste tu contraseña?'),
+                  ),
                 ],
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DialogRecuperarContrasena extends StatefulWidget {
+  const _DialogRecuperarContrasena({required this.emailInicial});
+
+  final String emailInicial;
+
+  @override
+  State<_DialogRecuperarContrasena> createState() => _DialogRecuperarContrasenaState();
+}
+
+class _DialogRecuperarContrasenaState extends State<_DialogRecuperarContrasena> {
+  late final _emailCtrl = TextEditingController(text: widget.emailInicial);
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Recuperar contraseña'),
+      content: TextField(
+        controller: _emailCtrl,
+        decoration: const InputDecoration(labelText: 'Email'),
+        keyboardType: TextInputType.emailAddress,
+        autofocus: true,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(_emailCtrl.text.trim()),
+          child: const Text('Enviar'),
+        ),
+      ],
     );
   }
 }

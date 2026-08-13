@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/agenda/presentation/agenda_screen.dart';
 import '../../features/agenda/presentation/evento_formulario_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/reset_password_screen.dart';
 import '../../features/clientes/presentation/cliente_ficha_screen.dart';
 import '../../features/clientes/presentation/cliente_formulario_screen.dart';
 import '../../features/clientes/presentation/clientes_lista_screen.dart';
@@ -29,16 +31,22 @@ GoRouter appRouter(Ref ref) {
 
   return GoRouter(
     initialLocation: '/inicio',
-    refreshListenable: refreshStream,
+    refreshListenable: Listenable.merge([refreshStream, isPasswordRecovery]),
     redirect: (context, state) {
       final haySesion = supabase.auth.currentSession != null;
       final enLogin = state.matchedLocation == '/login';
+      final enResetPassword = state.matchedLocation == '/reset-password';
+
+      if (isPasswordRecovery.value) {
+        return enResetPassword ? null : '/reset-password';
+      }
       if (!haySesion && !enLogin) return '/login';
       if (haySesion && enLogin) return '/inicio';
       return null;
     },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(path: '/reset-password', builder: (context, state) => const ResetPasswordScreen()),
       GoRoute(
         path: '/procedimientos',
         builder: (context, state) => const ProcedimientosListaScreen(),
