@@ -1,0 +1,27 @@
+import 'package:flutter/material.dart';
+
+/// Centra el contenido y le pone un ancho máximo en pantallas anchas
+/// (tablet/escritorio en la versión web), para que no se estire de borde a
+/// borde en un monitor. En móvil no cambia nada: [maxWidth] no llega a
+/// aplicarse porque la pantalla ya es más estrecha que eso.
+class ResponsiveContent extends StatelessWidget {
+  const ResponsiveContent({
+    super.key,
+    required this.child,
+    this.maxWidth = 900,
+  });
+
+  final Widget child;
+  final double maxWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: child,
+      ),
+    );
+  }
+}

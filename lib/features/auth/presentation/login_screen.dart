@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -47,23 +48,32 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _recuperarContrasena() async {
     final email = await showDialog<String>(
       context: context,
-      builder: (context) => _DialogRecuperarContrasena(emailInicial: _emailCtrl.text.trim()),
+      builder: (context) =>
+          _DialogRecuperarContrasena(emailInicial: _emailCtrl.text.trim()),
     );
     if (email == null || email.isEmpty || !mounted) return;
 
     try {
       await supabase.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'tusjuicios://reset-password',
+        redirectTo: kIsWeb
+            ? '${Uri.base.origin}/reset-password'
+            : 'tusjuicios://reset-password',
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Te hemos enviado un email para restablecer la contraseña')),
+          const SnackBar(
+            content: Text(
+              'Te hemos enviado un email para restablecer la contraseña',
+            ),
+          ),
         );
       }
     } on AuthException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     }
   }
@@ -82,25 +92,35 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('TusJuicios', style: Theme.of(context).textTheme.headlineMedium),
+                  Text(
+                    'TusJuicios',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _emailCtrl,
                     decoration: const InputDecoration(labelText: 'Email'),
                     keyboardType: TextInputType.emailAddress,
-                    validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
+                    validator: (value) =>
+                        (value == null || value.isEmpty) ? 'Obligatorio' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordCtrl,
                     decoration: const InputDecoration(labelText: 'Contraseña'),
                     obscureText: true,
-                    validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
+                    validator: (value) =>
+                        (value == null || value.isEmpty) ? 'Obligatorio' : null,
                     onFieldSubmitted: (_) => _iniciarSesion(),
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 16),
-                    Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                    Text(
+                      _error!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
                   ],
                   const SizedBox(height: 24),
                   FilledButton(
@@ -134,10 +154,12 @@ class _DialogRecuperarContrasena extends StatefulWidget {
   final String emailInicial;
 
   @override
-  State<_DialogRecuperarContrasena> createState() => _DialogRecuperarContrasenaState();
+  State<_DialogRecuperarContrasena> createState() =>
+      _DialogRecuperarContrasenaState();
 }
 
-class _DialogRecuperarContrasenaState extends State<_DialogRecuperarContrasena> {
+class _DialogRecuperarContrasenaState
+    extends State<_DialogRecuperarContrasena> {
   late final _emailCtrl = TextEditingController(text: widget.emailInicial);
 
   @override

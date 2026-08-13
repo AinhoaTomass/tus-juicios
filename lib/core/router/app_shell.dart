@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,25 +9,54 @@ import '../../features/clientes/presentation/procedimientos_providers.dart';
 import '../notificaciones/notificaciones_service.dart';
 import '../state/formulario_sucio_provider.dart';
 import '../widgets/confirmar_salida_dialog.dart';
+import '../widgets/responsive_content.dart';
 
 /// Shell con las 6 secciones del prototipo. En móvil se muestra como barra
-/// de navegación inferior; el layout master-detail de Clientes en tablet
-/// se resuelve dentro de la propia feature (ver clientes/presentation).
+/// de navegación inferior; en pantallas anchas (tablet/escritorio) pasa a un
+/// panel lateral y el contenido se centra con un ancho máximo. El layout
+/// master-detail de Clientes en tablet se resuelve dentro de la propia
+/// feature (ver clientes/presentation).
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.shell});
 
   final StatefulNavigationShell shell;
 
-  static const _destinations = [
-    NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Inicio'),
-    NavigationDestination(icon: Icon(Icons.people_outline), selectedIcon: Icon(Icons.people), label: 'Clientes'),
-    NavigationDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event), label: 'Agenda'),
-    NavigationDestination(icon: Icon(Icons.savings_outlined), selectedIcon: Icon(Icons.savings), label: 'Rentas'),
-    NavigationDestination(icon: Icon(Icons.receipt_long_outlined), selectedIcon: Icon(Icons.receipt_long), label: 'Facturas'),
-    NavigationDestination(icon: Icon(Icons.sticky_note_2_outlined), selectedIcon: Icon(Icons.sticky_note_2), label: 'Notas'),
+  static const _anchoPanelLateral = 700.0;
+
+  static const _destinos = [
+    (icon: Icons.home_outlined, iconSeleccionado: Icons.home, label: 'Inicio'),
+    (
+      icon: Icons.people_outline,
+      iconSeleccionado: Icons.people,
+      label: 'Clientes',
+    ),
+    (
+      icon: Icons.event_outlined,
+      iconSeleccionado: Icons.event,
+      label: 'Agenda',
+    ),
+    (
+      icon: Icons.savings_outlined,
+      iconSeleccionado: Icons.savings,
+      label: 'Rentas',
+    ),
+    (
+      icon: Icons.receipt_long_outlined,
+      iconSeleccionado: Icons.receipt_long,
+      label: 'Facturas',
+    ),
+    (
+      icon: Icons.sticky_note_2_outlined,
+      iconSeleccionado: Icons.sticky_note_2,
+      label: 'Notas',
+    ),
   ];
 
-  Future<void> _cambiarPestana(BuildContext context, WidgetRef ref, int index) async {
+  Future<void> _cambiarPestana(
+    BuildContext context,
+    WidgetRef ref,
+    int index,
+  ) async {
     if (ref.read(formularioSucioProvider)) {
       final salir = await confirmarSalirSinGuardar(context);
       if (!salir) return;
@@ -39,7 +69,9 @@ class AppShell extends ConsumerWidget {
 
   /// Reprograma los recordatorios locales (citas y procedimientos por
   /// vencer) cada vez que cambian los datos de agenda o procedimientos.
+  /// Solo tiene sentido en móvil: en web no se piden ni se programan.
   void _reprogramarRecordatorios(WidgetRef ref) {
+    if (kIsWeb) return;
     final eventos = ref.read(eventosListaProvider).value;
     final procedimientos = ref.read(procedimientosListaProvider).value;
     final config = ref.read(recordatoriosConfigProvider).value;
@@ -54,15 +86,62 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(eventosListaProvider, (_, _) => _reprogramarRecordatorios(ref));
-    ref.listen(procedimientosListaProvider, (_, _) => _reprogramarRecordatorios(ref));
-    ref.listen(recordatoriosConfigProvider, (_, _) => _reprogramarRecordatorios(ref));
+    ref.listen(
+      procedimientosListaProvider,
+      (_, _) => _reprogramarRecordatorios(ref),
+    );
+    ref.listen(
+      recordatoriosConfigProvider,
+      (_, _) => _reprogramarRecordatorios(ref),
+    );
+
+    final ancho = MediaQuery.sizeOf(context).width;
+    final esPanelLateral = ancho >= _anchoPanelLateral;
+
+    final contenido = ResponsiveContent(child: shell);
+
+    if (!esPanelLateral) {
+      return Scaffold(
+        body: contenido,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: shell.currentIndex,
+          onDestinationSelected: (index) =>
+              _cambiarPestana(context, ref, index),
+          destinations: [
+            for (final destino in _destinos)
+              NavigationDestination(
+                icon: Icon(destino.icon),
+                selectedIcon: Icon(destino.iconSeleccionado),
+                label: destino.label,
+              ),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
-      body: shell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: shell.currentIndex,
-        onDestinationSelected: (index) => _cambiarPestana(context, ref, index),
-        destinations: _destinations,
+      body: Row(
+        children: [
+          NavigationRail(
+            extended: ancho >= 1000,
+            selectedIndex: shell.currentIndex,
+            onDestinationSelected: (index) =>
+                _cambiarPestana(context, ref, index),
+            labelType: ancho >= 1000
+                ? NavigationRailLabelType.none
+                : NavigationRailLabelType.all,
+            destinations: [
+              for (final destino in _destinos)
+                NavigationRailDestination(
+                  icon: Icon(destino.icon),
+                  selectedIcon: Icon(destino.iconSeleccionado),
+                  label: Text(destino.label),
+                ),
+            ],
+          ),
+          const VerticalDivider(width: 1),
+          Expanded(child: contenido),
+        ],
       ),
     );
   }

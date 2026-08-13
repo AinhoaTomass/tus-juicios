@@ -1,12 +1,12 @@
 {
-    "name": "tusjuicios",
-    "short_name": "tusjuicios",
+    "name": "TusJuicios",
+    "short_name": "TusJuicios",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#FAF8F5",
+    "theme_color": "#B68235",
+    "description": "Gestión de clientes, procedimientos, agenda y facturación del despacho.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {
