@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
 import '../domain/cliente.dart';
+import 'documentos_providers.dart';
 import 'procedimientos_providers.dart';
+import 'widgets/seccion_documentos.dart';
 
 /// Formulario de alta (procedimientoId nulo) o edición de un procedimiento
 /// dentro de la ficha de un cliente.
@@ -179,6 +181,31 @@ class _ProcedimientoFormularioScreenState extends ConsumerState<ProcedimientoFor
                   ],
                 ),
               ),
+              if (esEdicion) ...[
+                const SizedBox(height: 24),
+                const Divider(),
+                const SizedBox(height: 16),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final documentosAsync = ref.watch(
+                      documentosDeProcedimientoProvider(widget.procedimientoId!),
+                    );
+                    return documentosAsync.when(
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (error, _) => Text('Error al cargar documentos: $error'),
+                      data: (documentos) => SeccionDocumentos(
+                        documentos: documentos,
+                        clienteId: widget.clienteId,
+                        procedimientoId: widget.procedimientoId,
+                        onCambio: (_) {
+                          ref.invalidate(documentosDeProcedimientoProvider(widget.procedimientoId!));
+                          ref.invalidate(documentosDeClienteProvider(widget.clienteId));
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ],
               const SizedBox(height: 24),
               Row(
                 children: [

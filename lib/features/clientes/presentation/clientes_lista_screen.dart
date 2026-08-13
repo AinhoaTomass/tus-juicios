@@ -32,7 +32,16 @@ class _ClientesListaScreenState extends ConsumerState<ClientesListaScreen> {
     final clientesAsync = ref.watch(clientesListaProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Clientes')),
+      appBar: AppBar(
+        title: const Text('Clientes'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Papelera',
+            onPressed: () => context.push('/clientes/papelera'),
+          ),
+        ],
+      ),
       body: clientesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error al cargar clientes: $error')),

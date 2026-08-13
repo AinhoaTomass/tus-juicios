@@ -13,6 +13,8 @@ import '../../agenda/domain/evento.dart';
 import '../../agenda/presentation/eventos_providers.dart';
 import '../../clientes/presentation/clientes_providers.dart';
 import '../../clientes/presentation/procedimientos_providers.dart';
+import '../../facturas/domain/factura.dart';
+import '../../facturas/presentation/facturas_providers.dart';
 
 class InicioScreen extends ConsumerStatefulWidget {
   const InicioScreen({super.key});
@@ -47,11 +49,32 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
     final clientesAsync = ref.watch(clientesListaProvider);
     final eventosAsync = ref.watch(eventosListaProvider);
     final procedimientosAsync = ref.watch(procedimientosListaProvider);
+    final facturasAsync = ref.watch(facturasListaProvider);
+
+    final ahora = DateTime.now();
+    final cobradoEsteMes = facturasAsync.value
+            ?.where(
+              (f) =>
+                  f.estado == EstadoFactura.pagada &&
+                  f.fecha.year == ahora.year &&
+                  f.fecha.month == ahora.month,
+            )
+            .fold<double>(0, (suma, f) => suma + f.importe) ??
+        0;
+    final pendienteCobro = facturasAsync.value
+            ?.where((f) => f.estado != EstadoFactura.pagada)
+            .fold<double>(0, (suma, f) => suma + f.importe) ??
+        0;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inicio'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Ajustes',
+            onPressed: () => context.push('/ajustes'),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Cerrar sesión',
@@ -94,13 +117,25 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
               StatTile(
                 valor: eventosAsync.value
                         ?.where(
-                          (e) => !e.fecha.isAfter(DateTime.now().add(const Duration(days: 7))),
+                          (e) =>
+                              !e.fecha.isBefore(DateTime.now()) &&
+                              !e.fecha.isAfter(DateTime.now().add(const Duration(days: 7))),
                         )
                         .length
                         .toString() ??
                     '–',
                 etiqueta: 'Citas esta semana',
                 onTap: () => context.go('/agenda'),
+              ),
+              StatTile(
+                valor: '${cobradoEsteMes.toStringAsFixed(0)} €',
+                etiqueta: 'Cobrado este mes',
+                onTap: () => context.go('/facturas'),
+              ),
+              StatTile(
+                valor: '${pendienteCobro.toStringAsFixed(0)} €',
+                etiqueta: 'Pendiente de cobro',
+                onTap: () => context.go('/facturas'),
               ),
             ],
           ),

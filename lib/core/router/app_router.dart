@@ -4,11 +4,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/agenda/presentation/agenda_screen.dart';
 import '../../features/agenda/presentation/evento_formulario_screen.dart';
+import '../../features/ajustes/presentation/ajustes_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/reset_password_screen.dart';
 import '../../features/clientes/presentation/cliente_ficha_screen.dart';
 import '../../features/clientes/presentation/cliente_formulario_screen.dart';
 import '../../features/clientes/presentation/clientes_lista_screen.dart';
+import '../../features/clientes/presentation/papelera_screen.dart';
 import '../../features/clientes/presentation/procedimiento_formulario_screen.dart';
 import '../../features/clientes/presentation/procedimientos_lista_screen.dart';
 import '../../features/facturas/presentation/factura_formulario_screen.dart';
@@ -47,6 +49,7 @@ GoRouter appRouter(Ref ref) {
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(path: '/reset-password', builder: (context, state) => const ResetPasswordScreen()),
+      GoRoute(path: '/ajustes', builder: (context, state) => const AjustesScreen()),
       GoRoute(
         path: '/procedimientos',
         builder: (context, state) => const ProcedimientosListaScreen(),
@@ -68,6 +71,10 @@ GoRouter appRouter(Ref ref) {
                   GoRoute(
                     path: 'nuevo',
                     builder: (context, state) => const ClienteFormularioScreen(),
+                  ),
+                  GoRoute(
+                    path: 'papelera',
+                    builder: (context, state) => const PapeleraScreen(),
                   ),
                   GoRoute(
                     path: ':id',

@@ -7,7 +7,9 @@ import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
 import '../domain/cliente.dart';
 import 'clientes_providers.dart';
+import 'documentos_providers.dart';
 import 'procedimientos_providers.dart';
+import 'widgets/seccion_documentos.dart';
 
 class ClienteFichaScreen extends ConsumerWidget {
   const ClienteFichaScreen({super.key, required this.clienteId});
@@ -20,12 +22,52 @@ class ClienteFichaScreen extends ConsumerWidget {
         EstadoProcedimiento.cerrado => EstadoTono.neutro,
       };
 
+  Future<void> _moverAPapelera(BuildContext context, WidgetRef ref, Cliente cliente) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Mover a la papelera'),
+        content: Text(
+          '"${cliente.nombre}" se moverá a la papelera. Podrás restaurarlo desde ahí.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Mover a papelera'),
+          ),
+        ],
+      ),
+    );
+    if (confirmar != true) return;
+
+    await ref.read(clienteRepositoryProvider).moverAPapelera(cliente.id);
+    ref.invalidate(clientesListaProvider);
+    if (context.mounted) context.pop();
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final clienteAsync = ref.watch(clientePorIdProvider(clienteId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ficha de cliente')),
+      appBar: AppBar(
+        title: const Text('Ficha de cliente'),
+        actions: [
+          clienteAsync.when(
+            loading: () => const SizedBox.shrink(),
+            error: (error, _) => const SizedBox.shrink(),
+            data: (cliente) => IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Mover a papelera',
+              onPressed: () => _moverAPapelera(context, ref, cliente),
+            ),
+          ),
+        ],
+      ),
       body: clienteAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error al cargar el cliente: $error')),
@@ -151,9 +193,19 @@ class ClienteFichaScreen extends ConsumerWidget {
                                             style: Theme.of(context).textTheme.titleSmall,
                                           ),
                                         ),
-                                        EstadoChip(
-                                          label: p.estado.name,
-                                          tono: _tonoProcedimiento(p.estado),
+                                        Wrap(
+                                          spacing: 4,
+                                          children: [
+                                            if (p.vencido)
+                                              const EstadoChip(
+                                                label: 'Vencido',
+                                                tono: EstadoTono.urgente,
+                                              ),
+                                            EstadoChip(
+                                              label: p.estado.name,
+                                              tono: _tonoProcedimiento(p.estado),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -172,6 +224,30 @@ class ClienteFichaScreen extends ConsumerWidget {
                           .toList(),
                     );
                   },
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            Consumer(
+              builder: (context, ref, _) {
+                final documentosAsync = ref.watch(documentosDeClienteProvider(clienteId));
+                return documentosAsync.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (error, _) => Text('Error al cargar documentos: $error'),
+                  data: (documentos) => SeccionDocumentos(
+                    documentos: documentos,
+                    clienteId: clienteId,
+                    agruparPorProcedimiento: true,
+                    onCambio: (procedimientoId) {
+                      ref.invalidate(documentosDeClienteProvider(clienteId));
+                      if (procedimientoId != null) {
+                        ref.invalidate(documentosDeProcedimientoProvider(procedimientoId));
+                      }
+                    },
+                  ),
                 );
               },
             ),
@@ -203,3 +279,4 @@ class ClienteFichaScreen extends ConsumerWidget {
     );
   }
 }
+

@@ -14,6 +14,9 @@ extension ClienteMapper on Map<String, dynamic> {
             ? null
             : DateTime.parse(this['fecha_vencimiento'] as String),
         notas: this['notas'] as String?,
+        eliminadoEn: this['eliminado_en'] == null
+            ? null
+            : DateTime.parse(this['eliminado_en'] as String),
       );
 }
 

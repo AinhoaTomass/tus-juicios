@@ -86,9 +86,19 @@ class _ProcedimientosListaScreenState extends ConsumerState<ProcedimientosListaS
                                       ],
                                     ),
                                   ),
-                                  EstadoChip(
-                                    label: procedimiento.estado.name,
-                                    tono: _tono(procedimiento.estado),
+                                  Wrap(
+                                    spacing: 4,
+                                    children: [
+                                      if (procedimiento.vencido)
+                                        const EstadoChip(
+                                          label: 'Vencido',
+                                          tono: EstadoTono.urgente,
+                                        ),
+                                      EstadoChip(
+                                        label: procedimiento.estado.name,
+                                        tono: _tono(procedimiento.estado),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

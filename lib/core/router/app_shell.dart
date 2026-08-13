@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/agenda/presentation/eventos_providers.dart';
+import '../../features/ajustes/presentation/ajustes_providers.dart';
+import '../../features/clientes/presentation/procedimientos_providers.dart';
+import '../notificaciones/notificaciones_service.dart';
 import '../state/formulario_sucio_provider.dart';
 import '../widgets/confirmar_salida_dialog.dart';
 
@@ -33,8 +37,26 @@ class AppShell extends ConsumerWidget {
     if (context.mounted) shell.goBranch(index, initialLocation: true);
   }
 
+  /// Reprograma los recordatorios locales (citas y procedimientos por
+  /// vencer) cada vez que cambian los datos de agenda o procedimientos.
+  void _reprogramarRecordatorios(WidgetRef ref) {
+    final eventos = ref.read(eventosListaProvider).value;
+    final procedimientos = ref.read(procedimientosListaProvider).value;
+    final config = ref.read(recordatoriosConfigProvider).value;
+    if (eventos == null || procedimientos == null || config == null) return;
+    NotificacionesService.instancia.reprogramar(
+      eventos: eventos,
+      procedimientos: procedimientos,
+      config: config,
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen(eventosListaProvider, (_, _) => _reprogramarRecordatorios(ref));
+    ref.listen(procedimientosListaProvider, (_, _) => _reprogramarRecordatorios(ref));
+    ref.listen(recordatoriosConfigProvider, (_, _) => _reprogramarRecordatorios(ref));
+
     return Scaffold(
       body: shell,
       bottomNavigationBar: NavigationBar(

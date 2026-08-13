@@ -28,3 +28,18 @@ class ClientesLista extends _$ClientesLista {
 Future<Cliente> clientePorId(Ref ref, String id) {
   return ref.watch(clienteRepositoryProvider).obtenerClientePorId(id);
 }
+
+@riverpod
+class ClientesPapelera extends _$ClientesPapelera {
+  @override
+  Future<List<Cliente>> build() {
+    return ref.watch(clienteRepositoryProvider).obtenerClientesEnPapelera();
+  }
+
+  Future<void> refrescar() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(clienteRepositoryProvider).obtenerClientesEnPapelera(),
+    );
+  }
+}

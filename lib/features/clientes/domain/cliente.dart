@@ -14,6 +14,7 @@ class Cliente {
     this.resumen,
     this.fechaVencimiento,
     this.notas,
+    this.eliminadoEn,
     this.procedimientos = const [],
   });
 
@@ -27,6 +28,9 @@ class Cliente {
   final String? resumen;
   final DateTime? fechaVencimiento;
   final String? notas;
+
+  /// Si no es nulo, el cliente está en la papelera desde esa fecha.
+  final DateTime? eliminadoEn;
   final List<Procedimiento> procedimientos;
 
   /// Urgente si vence en <=3 días.
@@ -55,4 +59,13 @@ class Procedimiento {
 
   /// Solo relleno al leer el listado global (join con clientes); no se persiste.
   final String? clienteNombre;
+
+  /// Vencido si tiene fecha meta pasada y sigue sin cerrarse. No cambia
+  /// [estado]: es solo un aviso visual para que se revise manualmente.
+  bool get vencido {
+    if (fechaMeta == null || estado == EstadoProcedimiento.cerrado) return false;
+    final hoy = DateTime.now();
+    final inicioHoy = DateTime(hoy.year, hoy.month, hoy.day);
+    return fechaMeta!.isBefore(inicioHoy);
+  }
 }

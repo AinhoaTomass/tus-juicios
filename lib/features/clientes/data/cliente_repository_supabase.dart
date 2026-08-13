@@ -12,7 +12,11 @@ class ClienteRepositorySupabase implements ClienteRepository {
 
   @override
   Future<List<Cliente>> obtenerClientes() async {
-    final rows = await _client.from('clientes').select().order('nombre');
+    final rows = await _client
+        .from('clientes')
+        .select()
+        .isFilter('eliminado_en', null)
+        .order('nombre');
     return rows.map((row) => row.toCliente()).toList();
   }
 
@@ -37,6 +41,29 @@ class ClienteRepositorySupabase implements ClienteRepository {
         .select()
         .single();
     return row.toCliente();
+  }
+
+  @override
+  Future<List<Cliente>> obtenerClientesEnPapelera() async {
+    final rows = await _client
+        .from('clientes')
+        .select()
+        .not('eliminado_en', 'is', null)
+        .order('eliminado_en', ascending: false);
+    return rows.map((row) => row.toCliente()).toList();
+  }
+
+  @override
+  Future<void> moverAPapelera(String id) {
+    return _client
+        .from('clientes')
+        .update({'eliminado_en': DateTime.now().toIso8601String()})
+        .eq('id', id);
+  }
+
+  @override
+  Future<void> restaurarDePapelera(String id) {
+    return _client.from('clientes').update({'eliminado_en': null}).eq('id', id);
   }
 
   @override

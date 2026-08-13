@@ -168,3 +168,47 @@ final class ClientePorIdFamily extends $Family
   @override
   String toString() => r'clientePorIdProvider';
 }
+
+@ProviderFor(ClientesPapelera)
+final clientesPapeleraProvider = ClientesPapeleraProvider._();
+
+final class ClientesPapeleraProvider
+    extends $AsyncNotifierProvider<ClientesPapelera, List<Cliente>> {
+  ClientesPapeleraProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'clientesPapeleraProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$clientesPapeleraHash();
+
+  @$internal
+  @override
+  ClientesPapelera create() => ClientesPapelera();
+}
+
+String _$clientesPapeleraHash() => r'b21452a5e860afd6982b6d9530b140ccb5533786';
+
+abstract class _$ClientesPapelera extends $AsyncNotifier<List<Cliente>> {
+  FutureOr<List<Cliente>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<List<Cliente>>, List<Cliente>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<Cliente>>, List<Cliente>>,
+              AsyncValue<List<Cliente>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

@@ -19,6 +19,9 @@ class EstadoChip extends StatelessWidget {
         EstadoTono.urgente => const Color(0xFFB33A3A),
       };
 
+  String get _labelCapitalizado =>
+      label.isEmpty ? label : label[0].toUpperCase() + label.substring(1);
+
   @override
   Widget build(BuildContext context) {
     final color = _color;
@@ -27,7 +30,7 @@ class EstadoChip extends StatelessWidget {
           fontWeight: FontWeight.w600,
         );
     return Chip(
-      label: Text(label, style: estilo),
+      label: Text(_labelCapitalizado, style: estilo),
       side: BorderSide(color: color, width: 1),
       backgroundColor: Colors.transparent,
       visualDensity: VisualDensity.compact,
