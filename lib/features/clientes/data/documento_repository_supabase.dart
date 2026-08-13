@@ -32,7 +32,7 @@ class DocumentoRepositorySupabase implements DocumentoRepository {
         .from('documentos')
         .select()
         .eq('procedimiento_id', procedimientoId)
-        .order('fecha_subida');
+        .order('fecha_subida', ascending: true);
     return rows.map((row) => row.toDocumento()).toList();
   }
 
