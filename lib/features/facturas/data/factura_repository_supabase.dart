@@ -14,7 +14,7 @@ class FacturaRepositorySupabase implements FacturaRepository {
   Future<List<Factura>> obtenerFacturas() async {
     final rows = await _client
         .from('facturas')
-        .select('*, clientes(nombre)')
+        .select('*, clientes(nombre, nif_cif, direccion)')
         .order('fecha', ascending: false);
     return rows.map((row) => row.toFactura()).toList();
   }

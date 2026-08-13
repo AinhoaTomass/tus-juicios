@@ -10,6 +10,8 @@ class Factura {
     required this.fecha,
     this.concepto,
     this.clienteNombre,
+    this.clienteNifCif,
+    this.clienteDireccion,
   });
 
   final String id;
@@ -22,4 +24,6 @@ class Factura {
 
   /// Solo relleno al leer (join con clientes); no se persiste.
   final String? clienteNombre;
+  final String? clienteNifCif;
+  final String? clienteDireccion;
 }

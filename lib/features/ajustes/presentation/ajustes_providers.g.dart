@@ -59,3 +59,48 @@ abstract class _$RecordatoriosConfigNotifier
     element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(DatosDespachoNotifier)
+final datosDespachoProvider = DatosDespachoNotifierProvider._();
+
+final class DatosDespachoNotifierProvider
+    extends $AsyncNotifierProvider<DatosDespachoNotifier, DatosDespacho> {
+  DatosDespachoNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'datosDespachoProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$datosDespachoNotifierHash();
+
+  @$internal
+  @override
+  DatosDespachoNotifier create() => DatosDespachoNotifier();
+}
+
+String _$datosDespachoNotifierHash() =>
+    r'8cf67ad3bc1226706b330a79467f58d657dafc07';
+
+abstract class _$DatosDespachoNotifier extends $AsyncNotifier<DatosDespacho> {
+  FutureOr<DatosDespacho> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<DatosDespacho>, DatosDespacho>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<DatosDespacho>, DatosDespacho>,
+              AsyncValue<DatosDespacho>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

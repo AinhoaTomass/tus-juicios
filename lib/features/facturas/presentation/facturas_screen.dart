@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/filtro_chips.dart';
 import '../../../core/widgets/hairline_card.dart';
 import '../../../core/widgets/stat_tile.dart';
+import '../../ajustes/presentation/ajustes_providers.dart';
+import '../data/factura_pdf.dart';
 import '../domain/factura.dart';
 import 'facturas_providers.dart';
 
@@ -25,6 +28,14 @@ class _FacturasScreenState extends ConsumerState<FacturasScreen> {
         EstadoFactura.pagada => EstadoTono.exito,
         EstadoFactura.vencida => EstadoTono.urgente,
       };
+
+  Future<void> _verPdf(Factura factura) async {
+    final despacho = await ref.read(datosDespachoProvider.future);
+    await Printing.layoutPdf(
+      name: 'Factura ${factura.numero}',
+      onLayout: (_) => generarFacturaPdf(factura, despacho),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,6 +117,11 @@ class _FacturasScreenState extends ConsumerState<FacturasScreen> {
                                     '${factura.numero} · ${factura.clienteNombre ?? 'Cliente'}',
                                     style: Theme.of(context).textTheme.titleMedium,
                                   ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.picture_as_pdf_outlined, size: 20),
+                                  tooltip: 'Ver PDF',
+                                  onPressed: () => _verPdf(factura),
                                 ),
                                 EstadoChip(
                                   label: factura.estado.name,

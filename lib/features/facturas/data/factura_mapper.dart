@@ -10,6 +10,8 @@ extension FacturaMapper on Map<String, dynamic> {
         fecha: DateTime.parse(this['fecha'] as String),
         concepto: this['concepto'] as String?,
         clienteNombre: (this['clientes'] as Map<String, dynamic>?)?['nombre'] as String?,
+        clienteNifCif: (this['clientes'] as Map<String, dynamic>?)?['nif_cif'] as String?,
+        clienteDireccion: (this['clientes'] as Map<String, dynamic>?)?['direccion'] as String?,
       );
 }
 
