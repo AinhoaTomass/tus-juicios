@@ -8,6 +8,7 @@ import '../../../core/widgets/contador_badge.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/filtro_chips.dart';
 import '../../../core/widgets/hairline_card.dart';
+import '../../../core/widgets/responsive_content.dart';
 import '../../../core/widgets/stat_tile.dart';
 import '../../agenda/domain/evento.dart';
 import '../../agenda/presentation/eventos_providers.dart';
@@ -66,21 +67,26 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
             .fold<double>(0, (suma, f) => suma + f.importe) ??
         0;
 
+    // En pantallas anchas estos botones ya están en el panel lateral.
+    final ocultarAccionesDeCuenta = MediaQuery.sizeOf(context).width >= anchoPanelLateral;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inicio'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Ajustes',
-            onPressed: () => context.push('/ajustes'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Cerrar sesión',
-            onPressed: () => supabase.auth.signOut(),
-          ),
-        ],
+        actions: ocultarAccionesDeCuenta
+            ? null
+            : [
+                IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  tooltip: 'Ajustes',
+                  onPressed: () => context.push('/ajustes'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  tooltip: 'Cerrar sesión',
+                  onPressed: () => supabase.auth.signOut(),
+                ),
+              ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

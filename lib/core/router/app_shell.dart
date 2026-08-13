@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/agenda/presentation/eventos_providers.dart';
 import '../../features/ajustes/presentation/ajustes_providers.dart';
 import '../../features/clientes/presentation/procedimientos_providers.dart';
+import '../network/supabase_client.dart';
 import '../notificaciones/notificaciones_service.dart';
 import '../state/formulario_sucio_provider.dart';
 import '../widgets/confirmar_salida_dialog.dart';
@@ -26,8 +27,6 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
-  static const _anchoPanelLateral = 700.0;
-
   static const _destinos = [
     (icon: Icons.home_outlined, iconSeleccionado: Icons.home, label: 'Inicio'),
     (icon: Icons.people_outline, iconSeleccionado: Icons.people, label: 'Clientes'),
@@ -81,7 +80,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     ref.listen(recordatoriosConfigProvider, (_, _) => _reprogramarRecordatorios());
 
     final ancho = MediaQuery.sizeOf(context).width;
-    final esPanelLateral = ancho >= _anchoPanelLateral;
+    final esPanelLateral = ancho >= anchoPanelLateral;
 
     final contenido = ResponsiveContent(child: widget.shell);
 
@@ -114,10 +113,33 @@ class _AppShellState extends ConsumerState<AppShell> {
               labelType: ancho >= 1000
                   ? NavigationRailLabelType.none
                   : NavigationRailLabelType.all,
-              leading: IconButton(
-                icon: const Icon(Icons.menu_open),
-                tooltip: 'Ocultar menú',
-                onPressed: () => setState(() => _menuVisible = false),
+              trailingAtBottom: true,
+              trailing: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.settings_outlined),
+                        tooltip: 'Ajustes',
+                        onPressed: () => context.push('/ajustes'),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.logout),
+                        tooltip: 'Cerrar sesión',
+                        onPressed: () => supabase.auth.signOut(),
+                      ),
+                      const Divider(height: 16),
+                      IconButton(
+                        icon: const Icon(Icons.menu_open),
+                        tooltip: 'Ocultar menú',
+                        onPressed: () => setState(() => _menuVisible = false),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               destinations: [
                 for (final destino in _destinos)
