@@ -6,16 +6,27 @@ import 'package:intl/intl.dart';
 import '../../../core/network/supabase_client.dart';
 import '../../../core/widgets/contador_badge.dart';
 import '../../../core/widgets/estado_chip.dart';
-import '../../../core/widgets/filtro_chips.dart';
 import '../../../core/widgets/hairline_card.dart';
 import '../../../core/widgets/responsive_content.dart';
 import '../../../core/widgets/stat_tile.dart';
 import '../../agenda/domain/evento.dart';
 import '../../agenda/presentation/eventos_providers.dart';
+import '../../clientes/domain/cliente.dart';
 import '../../clientes/presentation/clientes_providers.dart';
 import '../../clientes/presentation/procedimientos_providers.dart';
 import '../../facturas/domain/factura.dart';
 import '../../facturas/presentation/facturas_providers.dart';
+
+/// Algo próximo que mostrar en Inicio: una cita de agenda o un procedimiento
+/// con fecha meta. Unifica ambas fuentes para verlas en una sola lista.
+typedef _ItemProximo = ({
+  DateTime fecha,
+  String cliente,
+  String subtitulo,
+  String etiqueta,
+  EstadoTono tono,
+  String ruta,
+});
 
 class InicioScreen extends ConsumerStatefulWidget {
   const InicioScreen({super.key});
@@ -25,7 +36,14 @@ class InicioScreen extends ConsumerStatefulWidget {
 }
 
 class _InicioScreenState extends ConsumerState<InicioScreen> {
-  TipoEvento? _filtroTipo;
+  final _busquedaCtrl = TextEditingController();
+  String _busqueda = '';
+
+  @override
+  void dispose() {
+    _busquedaCtrl.dispose();
+    super.dispose();
+  }
 
   String get _saludo {
     final hora = DateTime.now().hour;
@@ -150,11 +168,50 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
             loading: () => const HairlineCard(child: LinearProgressIndicator()),
             error: (error, _) => HairlineCard(child: Text('Error: $error')),
             data: (eventos) {
-              final proximos = eventos.where((e) => !e.fecha.isBefore(DateTime.now())).toList()
+              final ahora = DateTime.now();
+
+              final deEventos = eventos.where((e) => !e.fecha.isBefore(ahora)).map<_ItemProximo>(
+                    (e) => (
+                      fecha: e.fecha,
+                      cliente: e.clienteNombre ?? 'Cliente',
+                      subtitulo: '${e.fecha.day}/${e.fecha.month}/${e.fecha.year}'
+                          '${e.hora != null ? ' · ${e.hora}' : ''}',
+                      etiqueta: _etiquetaTipoEvento(e.tipo),
+                      tono: EstadoTono.neutro,
+                      ruta: '/agenda/${e.id}/editar',
+                    ),
+                  );
+
+              final deProcedimientos = (procedimientosAsync.value ?? [])
+                  .where(
+                    (p) =>
+                        p.fechaMeta != null &&
+                        p.estado != EstadoProcedimiento.cerrado &&
+                        !p.fechaMeta!.isBefore(ahora),
+                  )
+                  .map<_ItemProximo>(
+                    (p) => (
+                      fecha: p.fechaMeta!,
+                      cliente: p.clienteNombre ?? 'Cliente',
+                      subtitulo: '${p.nombre} · vence '
+                          '${p.fechaMeta!.day}/${p.fechaMeta!.month}/${p.fechaMeta!.year}',
+                      etiqueta: 'Trámite',
+                      tono: EstadoTono.aviso,
+                      ruta: '/clientes/${p.clienteId}/procedimientos/${p.id}/editar',
+                    ),
+                  );
+
+              final proximos = [...deEventos, ...deProcedimientos].toList()
                 ..sort((a, b) => a.fecha.compareTo(b.fecha));
-              final filtrados = _filtroTipo == null
+
+              final texto = _busqueda.trim().toLowerCase();
+              final filtrados = texto.isEmpty
                   ? proximos
-                  : proximos.where((e) => e.tipo == _filtroTipo).toList();
+                  : proximos.where((item) {
+                      return item.cliente.toLowerCase().contains(texto) ||
+                          item.etiqueta.toLowerCase().contains(texto) ||
+                          item.subtitulo.toLowerCase().contains(texto);
+                    }).toList();
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,25 +224,23 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  FiltroChips<TipoEvento?>(
-                    opciones: [
-                      (null, 'Todos'),
-                      (TipoEvento.juicio, 'Juicio'),
-                      (TipoEvento.smac, 'SMAC'),
-                      (TipoEvento.conciliacion, 'Conciliación'),
-                    ],
-                    seleccion: _filtroTipo,
-                    onChanged: (valor) => setState(() => _filtroTipo = valor),
+                  TextField(
+                    controller: _busquedaCtrl,
+                    decoration: const InputDecoration(
+                      hintText: 'Buscar por cliente o tipo…',
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: (value) => setState(() => _busqueda = value),
                   ),
                   const SizedBox(height: 12),
                   if (filtrados.isEmpty)
                     const Text('Sin eventos próximos.')
                   else
                     ...filtrados.map(
-                      (e) => Padding(
+                      (item) => Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: HairlineCard(
-                          onTap: () => context.go('/agenda/${e.id}/editar'),
+                          onTap: () => context.go(item.ruta),
                           child: Row(
                             children: [
                               Expanded(
@@ -193,18 +248,17 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      e.clienteNombre ?? 'Cliente',
+                                      item.cliente,
                                       style: Theme.of(context).textTheme.titleMedium,
                                     ),
                                     Text(
-                                      '${e.fecha.day}/${e.fecha.month}/${e.fecha.year}'
-                                      '${e.hora != null ? ' · ${e.hora}' : ''}',
+                                      item.subtitulo,
                                       style: Theme.of(context).textTheme.bodySmall,
                                     ),
                                   ],
                                 ),
                               ),
-                              EstadoChip(label: _etiquetaTipoEvento(e.tipo)),
+                              EstadoChip(label: item.etiqueta, tono: item.tono),
                             ],
                           ),
                         ),

@@ -117,9 +117,9 @@ class _AppShellState extends ConsumerState<AppShell> {
               trailing: SafeArea(
                 top: false,
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
                     children: [
                       IconButton(
                         icon: const Icon(Icons.settings_outlined),
@@ -131,7 +131,6 @@ class _AppShellState extends ConsumerState<AppShell> {
                         tooltip: 'Cerrar sesión',
                         onPressed: () => supabase.auth.signOut(),
                       ),
-                      const Divider(height: 16),
                       IconButton(
                         icon: const Icon(Icons.menu_open),
                         tooltip: 'Ocultar menú',
