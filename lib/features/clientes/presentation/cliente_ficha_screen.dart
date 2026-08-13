@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
+import '../../notas/presentation/notas_providers.dart';
 import '../domain/cliente.dart';
 import 'clientes_providers.dart';
 import 'documentos_providers.dart';
@@ -240,14 +241,75 @@ class ClienteFichaScreen extends ConsumerWidget {
                   data: (documentos) => SeccionDocumentos(
                     documentos: documentos,
                     clienteId: clienteId,
-                    agruparPorProcedimiento: true,
-                    onCambio: (procedimientoId) {
-                      ref.invalidate(documentosDeClienteProvider(clienteId));
-                      if (procedimientoId != null) {
-                        ref.invalidate(documentosDeProcedimientoProvider(procedimientoId));
-                      }
-                    },
+                    onCambio: (_) => ref.invalidate(documentosDeClienteProvider(clienteId)),
                   ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Notas', style: Theme.of(context).textTheme.titleMedium),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  tooltip: 'Nueva nota',
+                  onPressed: () => context.go('/clientes/$clienteId/notas/nuevo'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Consumer(
+              builder: (context, ref, _) {
+                final notasAsync = ref.watch(notasDeClienteProvider(clienteId));
+                return notasAsync.when(
+                  loading: () => const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (error, _) => Text('Error al cargar notas: $error'),
+                  data: (notas) {
+                    if (notas.isEmpty) {
+                      return const Text('Sin notas.');
+                    }
+                    return Column(
+                      children: notas
+                          .map(
+                            (nota) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: HairlineCard(
+                                padding: const EdgeInsets.all(12),
+                                onTap: () =>
+                                    context.go('/clientes/$clienteId/notas/${nota.id}/editar'),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${nota.fecha.day}/${nota.fecha.month}/${nota.fecha.year}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium
+                                          ?.copyWith(color: AppTheme.accent),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(nota.titulo, style: Theme.of(context).textTheme.titleSmall),
+                                    if (nota.contenido != null) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        nota.contenido!,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    );
+                  },
                 );
               },
             ),

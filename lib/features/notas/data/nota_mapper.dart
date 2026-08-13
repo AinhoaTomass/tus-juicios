@@ -6,6 +6,8 @@ extension NotaMapper on Map<String, dynamic> {
         titulo: this['titulo'] as String,
         fecha: DateTime.parse(this['fecha'] as String),
         contenido: this['contenido'] as String?,
+        clienteId: this['cliente_id'] as String?,
+        clienteNombre: (this['clientes'] as Map<String, dynamic>?)?['nombre'] as String?,
       );
 }
 
@@ -14,5 +16,6 @@ extension NotaToRow on Nota {
         'titulo': titulo,
         'fecha': fecha.toIso8601String(),
         'contenido': contenido,
+        'cliente_id': clienteId,
       };
 }

@@ -8,6 +8,5 @@ extension DocumentoMapper on Map<String, dynamic> {
         storagePath: this['storage_path'] as String,
         fechaSubida: DateTime.parse(this['fecha_subida'] as String),
         procedimientoId: this['procedimiento_id'] as String?,
-        procedimientoNombre: (this['procedimientos'] as Map<String, dynamic>?)?['nombre'] as String?,
       );
 }

@@ -13,33 +13,26 @@ import '../widgets/responsive_content.dart';
 
 /// Shell con las 6 secciones del prototipo. En móvil se muestra como barra
 /// de navegación inferior; en pantallas anchas (tablet/escritorio) pasa a un
-/// panel lateral y el contenido se centra con un ancho máximo. El layout
-/// master-detail de Clientes en tablet se resuelve dentro de la propia
-/// feature (ver clientes/presentation).
-class AppShell extends ConsumerWidget {
+/// panel lateral (que se puede esconder) y el contenido se centra con un
+/// ancho máximo. El layout master-detail de Clientes en tablet se resuelve
+/// dentro de la propia feature (ver clientes/presentation).
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key, required this.shell});
 
   final StatefulNavigationShell shell;
 
+  @override
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
   static const _anchoPanelLateral = 700.0;
 
   static const _destinos = [
     (icon: Icons.home_outlined, iconSeleccionado: Icons.home, label: 'Inicio'),
-    (
-      icon: Icons.people_outline,
-      iconSeleccionado: Icons.people,
-      label: 'Clientes',
-    ),
-    (
-      icon: Icons.event_outlined,
-      iconSeleccionado: Icons.event,
-      label: 'Agenda',
-    ),
-    (
-      icon: Icons.savings_outlined,
-      iconSeleccionado: Icons.savings,
-      label: 'Rentas',
-    ),
+    (icon: Icons.people_outline, iconSeleccionado: Icons.people, label: 'Clientes'),
+    (icon: Icons.event_outlined, iconSeleccionado: Icons.event, label: 'Agenda'),
+    (icon: Icons.savings_outlined, iconSeleccionado: Icons.savings, label: 'Rentas'),
     (
       icon: Icons.receipt_long_outlined,
       iconSeleccionado: Icons.receipt_long,
@@ -52,11 +45,9 @@ class AppShell extends ConsumerWidget {
     ),
   ];
 
-  Future<void> _cambiarPestana(
-    BuildContext context,
-    WidgetRef ref,
-    int index,
-  ) async {
+  bool _menuVisible = true;
+
+  Future<void> _cambiarPestana(BuildContext context, int index) async {
     if (ref.read(formularioSucioProvider)) {
       final salir = await confirmarSalirSinGuardar(context);
       if (!salir) return;
@@ -64,13 +55,13 @@ class AppShell extends ConsumerWidget {
     }
     // Siempre resetea la rama a su pantalla raíz: cada pestaña debe mostrar
     // su listado, no un formulario a medio rellenar que quedó abierto.
-    if (context.mounted) shell.goBranch(index, initialLocation: true);
+    if (context.mounted) widget.shell.goBranch(index, initialLocation: true);
   }
 
   /// Reprograma los recordatorios locales (citas y procedimientos por
   /// vencer) cada vez que cambian los datos de agenda o procedimientos.
   /// Solo tiene sentido en móvil: en web no se piden ni se programan.
-  void _reprogramarRecordatorios(WidgetRef ref) {
+  void _reprogramarRecordatorios() {
     if (kIsWeb) return;
     final eventos = ref.read(eventosListaProvider).value;
     final procedimientos = ref.read(procedimientosListaProvider).value;
@@ -84,29 +75,22 @@ class AppShell extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen(eventosListaProvider, (_, _) => _reprogramarRecordatorios(ref));
-    ref.listen(
-      procedimientosListaProvider,
-      (_, _) => _reprogramarRecordatorios(ref),
-    );
-    ref.listen(
-      recordatoriosConfigProvider,
-      (_, _) => _reprogramarRecordatorios(ref),
-    );
+  Widget build(BuildContext context) {
+    ref.listen(eventosListaProvider, (_, _) => _reprogramarRecordatorios());
+    ref.listen(procedimientosListaProvider, (_, _) => _reprogramarRecordatorios());
+    ref.listen(recordatoriosConfigProvider, (_, _) => _reprogramarRecordatorios());
 
     final ancho = MediaQuery.sizeOf(context).width;
     final esPanelLateral = ancho >= _anchoPanelLateral;
 
-    final contenido = ResponsiveContent(child: shell);
+    final contenido = ResponsiveContent(child: widget.shell);
 
     if (!esPanelLateral) {
       return Scaffold(
         body: contenido,
         bottomNavigationBar: NavigationBar(
-          selectedIndex: shell.currentIndex,
-          onDestinationSelected: (index) =>
-              _cambiarPestana(context, ref, index),
+          selectedIndex: widget.shell.currentIndex,
+          onDestinationSelected: (index) => _cambiarPestana(context, index),
           destinations: [
             for (final destino in _destinos)
               NavigationDestination(
@@ -122,24 +106,40 @@ class AppShell extends ConsumerWidget {
     return Scaffold(
       body: Row(
         children: [
-          NavigationRail(
-            extended: ancho >= 1000,
-            selectedIndex: shell.currentIndex,
-            onDestinationSelected: (index) =>
-                _cambiarPestana(context, ref, index),
-            labelType: ancho >= 1000
-                ? NavigationRailLabelType.none
-                : NavigationRailLabelType.all,
-            destinations: [
-              for (final destino in _destinos)
-                NavigationRailDestination(
-                  icon: Icon(destino.icon),
-                  selectedIcon: Icon(destino.iconSeleccionado),
-                  label: Text(destino.label),
+          if (_menuVisible)
+            NavigationRail(
+              extended: ancho >= 1000,
+              selectedIndex: widget.shell.currentIndex,
+              onDestinationSelected: (index) => _cambiarPestana(context, index),
+              labelType: ancho >= 1000
+                  ? NavigationRailLabelType.none
+                  : NavigationRailLabelType.all,
+              leading: IconButton(
+                icon: const Icon(Icons.menu_open),
+                tooltip: 'Ocultar menú',
+                onPressed: () => setState(() => _menuVisible = false),
+              ),
+              destinations: [
+                for (final destino in _destinos)
+                  NavigationRailDestination(
+                    icon: Icon(destino.icon),
+                    selectedIcon: Icon(destino.iconSeleccionado),
+                    label: Text(destino.label),
+                  ),
+              ],
+            )
+          else
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: IconButton(
+                  icon: const Icon(Icons.menu),
+                  tooltip: 'Mostrar menú',
+                  onPressed: () => setState(() => _menuVisible = true),
                 ),
-            ],
-          ),
-          const VerticalDivider(width: 1),
+              ),
+            ),
+          if (_menuVisible) const VerticalDivider(width: 1),
           Expanded(child: contenido),
         ],
       ),

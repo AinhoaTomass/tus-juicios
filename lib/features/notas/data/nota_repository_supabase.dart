@@ -12,7 +12,20 @@ class NotaRepositorySupabase implements NotaRepository {
 
   @override
   Future<List<Nota>> obtenerNotas() async {
-    final rows = await _client.from('notas').select().order('fecha', ascending: false);
+    final rows = await _client
+        .from('notas')
+        .select('*, clientes(nombre)')
+        .order('fecha', ascending: false);
+    return rows.map((row) => row.toNota()).toList();
+  }
+
+  @override
+  Future<List<Nota>> obtenerNotasDeCliente(String clienteId) async {
+    final rows = await _client
+        .from('notas')
+        .select()
+        .eq('cliente_id', clienteId)
+        .order('fecha', ascending: false);
     return rows.map((row) => row.toNota()).toList();
   }
 

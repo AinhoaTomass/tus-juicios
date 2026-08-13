@@ -162,3 +162,92 @@ final class NotaPorIdFamily extends $Family
   @override
   String toString() => r'notaPorIdProvider';
 }
+
+@ProviderFor(NotasDeCliente)
+final notasDeClienteProvider = NotasDeClienteFamily._();
+
+final class NotasDeClienteProvider
+    extends $AsyncNotifierProvider<NotasDeCliente, List<Nota>> {
+  NotasDeClienteProvider._({
+    required NotasDeClienteFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'notasDeClienteProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$notasDeClienteHash();
+
+  @override
+  String toString() {
+    return r'notasDeClienteProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  NotasDeCliente create() => NotasDeCliente();
+
+  @override
+  bool operator ==(Object other) {
+    return other is NotasDeClienteProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$notasDeClienteHash() => r'b7cce3382eef37135faf896f9b8307b2349fc47a';
+
+final class NotasDeClienteFamily extends $Family
+    with
+        $ClassFamilyOverride<
+          NotasDeCliente,
+          AsyncValue<List<Nota>>,
+          List<Nota>,
+          FutureOr<List<Nota>>,
+          String
+        > {
+  NotasDeClienteFamily._()
+    : super(
+        retry: null,
+        name: r'notasDeClienteProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  NotasDeClienteProvider call(String clienteId) =>
+      NotasDeClienteProvider._(argument: clienteId, from: this);
+
+  @override
+  String toString() => r'notasDeClienteProvider';
+}
+
+abstract class _$NotasDeCliente extends $AsyncNotifier<List<Nota>> {
+  late final _$args = ref.$arg as String;
+  String get clienteId => _$args;
+
+  FutureOr<List<Nota>> build(String clienteId);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<List<Nota>>, List<Nota>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<Nota>>, List<Nota>>,
+              AsyncValue<List<Nota>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, () => build(_$args));
+  }
+}

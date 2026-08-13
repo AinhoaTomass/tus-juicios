@@ -17,19 +17,22 @@ class DocumentoRepositorySupabase implements DocumentoRepository {
   Future<List<Documento>> obtenerDocumentosDeCliente(String clienteId) async {
     final rows = await _client
         .from('documentos')
-        .select('*, procedimientos(nombre)')
+        .select()
         .eq('cliente_id', clienteId)
+        .isFilter('procedimiento_id', null)
         .order('fecha_subida', ascending: false);
     return rows.map((row) => row.toDocumento()).toList();
   }
 
   @override
   Future<List<Documento>> obtenerDocumentosDeProcedimiento(String procedimientoId) async {
+    // Ascendente: la línea de tiempo del procedimiento se lee del más
+    // antiguo al más reciente.
     final rows = await _client
         .from('documentos')
         .select()
         .eq('procedimiento_id', procedimientoId)
-        .order('fecha_subida', ascending: false);
+        .order('fecha_subida');
     return rows.map((row) => row.toDocumento()).toList();
   }
 
@@ -38,6 +41,7 @@ class DocumentoRepositorySupabase implements DocumentoRepository {
     required String clienteId,
     required String nombreArchivo,
     required Uint8List bytes,
+    required DateTime fecha,
     String? procedimientoId,
   }) async {
     final userId = _client.auth.currentUser!.id;
@@ -51,6 +55,7 @@ class DocumentoRepositorySupabase implements DocumentoRepository {
           'procedimiento_id': procedimientoId,
           'nombre_archivo': nombreArchivo,
           'storage_path': path,
+          'fecha_subida': fecha.toIso8601String(),
         })
         .select()
         .single();

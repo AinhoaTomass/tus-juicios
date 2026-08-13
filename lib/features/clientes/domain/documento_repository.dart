@@ -3,7 +3,8 @@ import 'dart:typed_data';
 import 'documento.dart';
 
 abstract class DocumentoRepository {
-  /// Todos los documentos del cliente, generales y de cualquier procedimiento.
+  /// Solo los documentos generales del cliente (sin procedimiento). Los
+  /// ligados a un procedimiento solo aparecen dentro de ese procedimiento.
   Future<List<Documento>> obtenerDocumentosDeCliente(String clienteId);
 
   Future<List<Documento>> obtenerDocumentosDeProcedimiento(String procedimientoId);
@@ -12,6 +13,7 @@ abstract class DocumentoRepository {
     required String clienteId,
     required String nombreArchivo,
     required Uint8List bytes,
+    required DateTime fecha,
     String? procedimientoId,
   });
 

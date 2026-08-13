@@ -8,6 +8,7 @@ import '../../../core/widgets/filtro_chips.dart';
 import '../../../core/widgets/hairline_card.dart';
 import '../domain/cliente.dart';
 import 'clientes_providers.dart';
+import 'procedimientos_providers.dart';
 
 class ClientesListaScreen extends ConsumerStatefulWidget {
   const ClientesListaScreen({super.key});
@@ -30,6 +31,7 @@ class _ClientesListaScreenState extends ConsumerState<ClientesListaScreen> {
   @override
   Widget build(BuildContext context) {
     final clientesAsync = ref.watch(clientesListaProvider);
+    final procedimientos = ref.watch(procedimientosListaProvider).value ?? [];
 
     return Scaffold(
       appBar: AppBar(
@@ -51,7 +53,10 @@ class _ClientesListaScreenState extends ConsumerState<ClientesListaScreen> {
             final texto = _busqueda.trim().toLowerCase();
             final coincideBusqueda = texto.isEmpty ||
                 c.nombre.toLowerCase().contains(texto) ||
-                c.nifCif.toLowerCase().contains(texto);
+                c.nifCif.toLowerCase().contains(texto) ||
+                procedimientos.any(
+                  (p) => p.clienteId == c.id && p.nombre.toLowerCase().contains(texto),
+                );
             return coincideTipo && coincideBusqueda;
           }).toList();
 
@@ -63,7 +68,7 @@ class _ClientesListaScreenState extends ConsumerState<ClientesListaScreen> {
                 TextField(
                   controller: _busquedaCtrl,
                   decoration: const InputDecoration(
-                    hintText: 'Buscar cliente o NIF…',
+                    hintText: 'Buscar cliente, NIF o procedimiento…',
                     prefixIcon: Icon(Icons.search),
                   ),
                   onChanged: (value) => setState(() => _busqueda = value),

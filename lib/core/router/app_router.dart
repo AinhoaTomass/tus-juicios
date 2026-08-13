@@ -100,6 +100,19 @@ GoRouter appRouter(Ref ref) {
                           procedimientoId: state.pathParameters['procedimientoId'],
                         ),
                       ),
+                      GoRoute(
+                        path: 'notas/nuevo',
+                        builder: (context, state) => NotaFormularioScreen(
+                          clienteId: state.pathParameters['id']!,
+                        ),
+                      ),
+                      GoRoute(
+                        path: 'notas/:notaId/editar',
+                        builder: (context, state) => NotaFormularioScreen(
+                          clienteId: state.pathParameters['id']!,
+                          notaId: state.pathParameters['notaId'],
+                        ),
+                      ),
                     ],
                   ),
                 ],

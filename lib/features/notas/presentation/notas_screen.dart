@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
 import 'notas_providers.dart';
 
@@ -39,12 +40,19 @@ class NotasScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              DateFormat('d MMM', 'es_ES').format(nota.fecha).toUpperCase(),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
-                                  ?.copyWith(color: AppTheme.accent),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  DateFormat('d MMM', 'es_ES').format(nota.fecha).toUpperCase(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelMedium
+                                      ?.copyWith(color: AppTheme.accent),
+                                ),
+                                if (nota.clienteNombre != null)
+                                  EstadoChip(label: nota.clienteNombre!),
+                              ],
                             ),
                             const SizedBox(height: 4),
                             Text(nota.titulo, style: Theme.of(context).textTheme.titleMedium),

@@ -27,3 +27,18 @@ Future<Nota> notaPorId(Ref ref, String id) async {
   final lista = await ref.watch(notasListaProvider.future);
   return lista.firstWhere((n) => n.id == id);
 }
+
+@riverpod
+class NotasDeCliente extends _$NotasDeCliente {
+  @override
+  Future<List<Nota>> build(String clienteId) {
+    return ref.watch(notaRepositoryProvider).obtenerNotasDeCliente(clienteId);
+  }
+
+  Future<void> refrescar() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(notaRepositoryProvider).obtenerNotasDeCliente(clienteId),
+    );
+  }
+}

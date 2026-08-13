@@ -34,7 +34,9 @@ class StatTile extends StatelessWidget {
   }
 }
 
-/// Cuadrícula 2x2 de [StatTile].
+/// Cuadrícula de [StatTile], usada al principio de Inicio, Rentas y
+/// Facturas. En móvil son 2 columnas; en pantallas más anchas (tablet/web)
+/// pasan a 3 o 4 para que las tarjetas no queden enormes con poco contenido.
 class StatTileGrid extends StatelessWidget {
   const StatTileGrid({super.key, required this.tiles});
 
@@ -42,14 +44,23 @@ class StatTileGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 8,
-      crossAxisSpacing: 8,
-      childAspectRatio: 1.9,
-      children: tiles,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columnas = switch (constraints.maxWidth) {
+          > 700 => 4,
+          > 480 => 3,
+          _ => 2,
+        };
+        return GridView.count(
+          crossAxisCount: columnas,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: 1.9,
+          children: tiles,
+        );
+      },
     );
   }
 }

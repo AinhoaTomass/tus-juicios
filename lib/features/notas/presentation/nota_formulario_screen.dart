@@ -7,11 +7,14 @@ import '../../../core/widgets/confirmar_salida_dialog.dart';
 import '../domain/nota.dart';
 import 'notas_providers.dart';
 
-/// Formulario de alta (notaId nulo) o edición de una nota.
+/// Formulario de alta (notaId nulo) o edición de una nota. Si [clienteId] se
+/// indica al crear, la nota queda ligada a ese cliente; si se abre para
+/// editar, el vínculo con el cliente lo trae la propia nota.
 class NotaFormularioScreen extends ConsumerStatefulWidget {
-  const NotaFormularioScreen({super.key, this.notaId});
+  const NotaFormularioScreen({super.key, this.notaId, this.clienteId});
 
   final String? notaId;
+  final String? clienteId;
 
   @override
   ConsumerState<NotaFormularioScreen> createState() => _NotaFormularioScreenState();
@@ -22,6 +25,7 @@ class _NotaFormularioScreenState extends ConsumerState<NotaFormularioScreen> {
   final _tituloCtrl = TextEditingController();
   final _contenidoCtrl = TextEditingController();
   DateTime _fecha = DateTime.now();
+  late String? _clienteId = widget.clienteId;
   bool _cargado = false;
 
   @override
@@ -46,6 +50,7 @@ class _NotaFormularioScreenState extends ConsumerState<NotaFormularioScreen> {
     _tituloCtrl.text = nota.titulo;
     _contenidoCtrl.text = nota.contenido ?? '';
     _fecha = nota.fecha;
+    _clienteId = nota.clienteId;
     _cargado = true;
   }
 
@@ -71,6 +76,7 @@ class _NotaFormularioScreenState extends ConsumerState<NotaFormularioScreen> {
       titulo: _tituloCtrl.text.trim(),
       fecha: _fecha,
       contenido: _contenidoCtrl.text.trim().isEmpty ? null : _contenidoCtrl.text.trim(),
+      clienteId: _clienteId,
     );
 
     if (widget.notaId == null) {
@@ -80,6 +86,7 @@ class _NotaFormularioScreenState extends ConsumerState<NotaFormularioScreen> {
     }
 
     ref.invalidate(notasListaProvider);
+    if (_clienteId != null) ref.invalidate(notasDeClienteProvider(_clienteId!));
     ref.read(formularioSucioProvider.notifier).limpiar();
     if (mounted) context.pop();
   }

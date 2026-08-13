@@ -197,6 +197,7 @@ class _ProcedimientoFormularioScreenState extends ConsumerState<ProcedimientoFor
                         documentos: documentos,
                         clienteId: widget.clienteId,
                         procedimientoId: widget.procedimientoId,
+                        estiloLinea: true,
                         onCambio: (_) {
                           ref.invalidate(documentosDeProcedimientoProvider(widget.procedimientoId!));
                           ref.invalidate(documentosDeClienteProvider(widget.clienteId));

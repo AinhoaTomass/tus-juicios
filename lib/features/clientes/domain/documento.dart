@@ -6,7 +6,6 @@ class Documento {
     required this.storagePath,
     required this.fechaSubida,
     this.procedimientoId,
-    this.procedimientoNombre,
   });
 
   final String id;
@@ -17,7 +16,4 @@ class Documento {
 
   /// Nulo si el documento es general del cliente, no de un trámite concreto.
   final String? procedimientoId;
-
-  /// Solo relleno al leer (join con procedimientos); no se persiste.
-  final String? procedimientoNombre;
 }
