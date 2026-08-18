@@ -57,6 +57,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
             children: [
               TableCalendar<Evento>(
                 locale: 'es_ES',
+                startingDayOfWeek: StartingDayOfWeek.monday,
                 firstDay: DateTime.utc(2000),
                 lastDay: DateTime.utc(2100),
                 focusedDay: _mesEnfocado,
