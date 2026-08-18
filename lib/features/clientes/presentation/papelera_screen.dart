@@ -73,7 +73,8 @@ class PapeleraScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(cliente.nombre, style: Theme.of(context).textTheme.titleMedium),
-                          Text(cliente.nifCif, style: Theme.of(context).textTheme.bodySmall),
+                          if (cliente.nifCif != null)
+                            Text(cliente.nifCif!, style: Theme.of(context).textTheme.bodySmall),
                         ],
                       ),
                     ),

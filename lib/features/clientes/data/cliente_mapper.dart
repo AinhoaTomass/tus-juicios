@@ -4,7 +4,7 @@ extension ClienteMapper on Map<String, dynamic> {
   Cliente toCliente() => Cliente(
         id: this['id'] as String,
         nombre: this['nombre'] as String,
-        nifCif: this['nif_cif'] as String,
+        nifCif: this['nif_cif'] as String?,
         tipo: TipoCliente.values.byName(this['tipo'] as String),
         telefono: this['telefono'] as String?,
         email: this['email'] as String?,

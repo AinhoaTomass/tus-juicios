@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/network/supabase_client.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/contador_badge.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
@@ -47,9 +48,9 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
 
   String get _saludo {
     final hora = DateTime.now().hour;
-    if (hora < 12) return 'Hola, buenos días';
-    if (hora < 20) return 'Hola, buenas tardes';
-    return 'Hola, buenas noches';
+    if (hora < 14) return 'Buenos días';
+    if (hora < 21) return 'Buenas tardes';
+    return 'Buenas noches';
   }
 
   String get _fechaHoy {
@@ -109,10 +110,21 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(_saludo, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 4),
-          Text(_fechaHoy, style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 16),
+          Text(_saludo, style: Theme.of(context).textTheme.displaySmall),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.calendar_today_outlined, size: 15, color: AppTheme.mutedInk),
+              const SizedBox(width: 6),
+              Text(
+                _fechaHoy,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.mutedInk),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Divider(),
+          const SizedBox(height: 20),
           StatTileGrid(
             tiles: [
               StatTile(
@@ -195,7 +207,7 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
                       cliente: p.clienteNombre ?? 'Cliente',
                       subtitulo: '${p.nombre} · vence '
                           '${p.fechaMeta!.day}/${p.fechaMeta!.month}/${p.fechaMeta!.year}',
-                      etiqueta: 'Trámite',
+                      etiqueta: 'Procedimiento',
                       tono: EstadoTono.aviso,
                       ruta: '/clientes/${p.clienteId}/procedimientos/${p.id}/editar',
                     ),

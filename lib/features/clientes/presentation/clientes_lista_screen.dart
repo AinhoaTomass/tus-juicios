@@ -53,7 +53,7 @@ class _ClientesListaScreenState extends ConsumerState<ClientesListaScreen> {
             final texto = _busqueda.trim().toLowerCase();
             final coincideBusqueda = texto.isEmpty ||
                 c.nombre.toLowerCase().contains(texto) ||
-                c.nifCif.toLowerCase().contains(texto) ||
+                (c.nifCif?.toLowerCase().contains(texto) ?? false) ||
                 procedimientos.any(
                   (p) => p.clienteId == c.id && p.nombre.toLowerCase().contains(texto),
                 );
@@ -137,7 +137,10 @@ class _ClienteCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '${cliente.nifCif} · ${cliente.tipo == TipoCliente.fisica ? 'FÍSICA' : 'JURÍDICA'}',
+            [
+              if (cliente.nifCif != null) cliente.nifCif!,
+              cliente.tipo == TipoCliente.fisica ? 'FÍSICA' : 'JURÍDICA',
+            ].join(' · '),
             style: textTheme.labelMedium?.copyWith(color: AppTheme.accent),
           ),
           if (cliente.resumen != null) ...[

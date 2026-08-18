@@ -93,8 +93,10 @@ class ClienteFichaScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${cliente.nifCif} · '
-                    '${cliente.tipo == TipoCliente.fisica ? 'FÍSICA' : 'JURÍDICA'}',
+                    [
+                      if (cliente.nifCif != null) cliente.nifCif!,
+                      cliente.tipo == TipoCliente.fisica ? 'FÍSICA' : 'JURÍDICA',
+                    ].join(' · '),
                     style: Theme.of(context)
                         .textTheme
                         .labelMedium
@@ -331,7 +333,7 @@ class ClienteFichaScreen extends ConsumerWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () => context.go('/clientes/$clienteId/procedimientos/nuevo'),
-                  child: const Text('Nuevo trámite'),
+                  child: const Text('Nuevo procedimiento'),
                 ),
               ),
             ],

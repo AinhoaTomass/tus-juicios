@@ -6,7 +6,7 @@ class Cliente {
   const Cliente({
     required this.id,
     required this.nombre,
-    required this.nifCif,
+    this.nifCif,
     required this.tipo,
     this.telefono,
     this.email,
@@ -20,7 +20,7 @@ class Cliente {
 
   final String id;
   final String nombre;
-  final String nifCif;
+  final String? nifCif;
   final TipoCliente tipo;
   final String? telefono;
   final String? email;

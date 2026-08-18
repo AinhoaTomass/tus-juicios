@@ -14,6 +14,6 @@ class Documento {
   final String storagePath;
   final DateTime fechaSubida;
 
-  /// Nulo si el documento es general del cliente, no de un trámite concreto.
+  /// Nulo si el documento es general del cliente, no de un procedimiento concreto.
   final String? procedimientoId;
 }

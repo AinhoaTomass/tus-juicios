@@ -55,7 +55,7 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
   void _rellenarSiEsEdicion(Cliente cliente) {
     if (_cargado) return;
     _nombreCtrl.text = cliente.nombre;
-    _nifCtrl.text = cliente.nifCif;
+    _nifCtrl.text = cliente.nifCif ?? '';
     _telefonoCtrl.text = cliente.telefono ?? '';
     _emailCtrl.text = cliente.email ?? '';
     _direccionCtrl.text = cliente.direccion ?? '';
@@ -86,7 +86,7 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
     final cliente = Cliente(
       id: widget.clienteId ?? '',
       nombre: _nombreCtrl.text.trim(),
-      nifCif: _nifCtrl.text.trim(),
+      nifCif: _nifCtrl.text.trim().isEmpty ? null : _nifCtrl.text.trim(),
       tipo: _tipo,
       telefono: _telefonoCtrl.text.trim().isEmpty ? null : _telefonoCtrl.text.trim(),
       email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
@@ -155,7 +155,6 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
             TextFormField(
               controller: _nifCtrl,
               decoration: const InputDecoration(labelText: 'NIF / CIF'),
-              validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
             ),
             const SizedBox(height: 16),
             SegmentedButton<TipoCliente>(
