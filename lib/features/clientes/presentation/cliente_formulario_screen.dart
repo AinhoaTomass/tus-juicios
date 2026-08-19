@@ -104,7 +104,12 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
 
     ref.invalidate(clientesListaProvider);
     ref.read(formularioSucioProvider.notifier).limpiar();
-    if (mounted) context.pop();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cliente guardado')),
+      );
+      context.pop();
+    }
   }
 
   @override

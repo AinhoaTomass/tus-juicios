@@ -90,7 +90,12 @@ class _RentaFormularioScreenState extends ConsumerState<RentaFormularioScreen> {
 
     ref.invalidate(rentasListaProvider);
     ref.read(formularioSucioProvider.notifier).limpiar();
-    if (mounted) context.pop();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Renta guardada')),
+      );
+      context.pop();
+    }
   }
 
   @override

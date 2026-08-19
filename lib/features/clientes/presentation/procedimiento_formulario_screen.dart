@@ -91,7 +91,12 @@ class _ProcedimientoFormularioScreenState extends ConsumerState<ProcedimientoFor
     ref.invalidate(procedimientosDeClienteProvider(widget.clienteId));
     ref.invalidate(procedimientosListaProvider);
     ref.read(formularioSucioProvider.notifier).limpiar();
-    if (mounted) context.pop();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Procedimiento guardado')),
+      );
+      context.pop();
+    }
   }
 
   @override

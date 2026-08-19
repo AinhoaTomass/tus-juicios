@@ -94,7 +94,12 @@ class _FacturaFormularioScreenState extends ConsumerState<FacturaFormularioScree
 
     ref.invalidate(facturasListaProvider);
     ref.read(formularioSucioProvider.notifier).limpiar();
-    if (mounted) context.pop();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Factura guardada')),
+      );
+      context.pop();
+    }
   }
 
   @override

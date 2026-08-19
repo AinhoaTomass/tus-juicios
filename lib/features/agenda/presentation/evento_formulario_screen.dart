@@ -102,7 +102,12 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
 
     ref.invalidate(eventosListaProvider);
     ref.read(formularioSucioProvider.notifier).limpiar();
-    if (mounted) context.pop();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Evento guardado')),
+      );
+      context.pop();
+    }
   }
 
   @override

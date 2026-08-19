@@ -88,7 +88,12 @@ class _NotaFormularioScreenState extends ConsumerState<NotaFormularioScreen> {
     ref.invalidate(notasListaProvider);
     if (_clienteId != null) ref.invalidate(notasDeClienteProvider(_clienteId!));
     ref.read(formularioSucioProvider.notifier).limpiar();
-    if (mounted) context.pop();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nota guardada')),
+      );
+      context.pop();
+    }
   }
 
   @override
