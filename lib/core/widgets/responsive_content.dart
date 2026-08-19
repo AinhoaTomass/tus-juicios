@@ -14,7 +14,7 @@ class ResponsiveContent extends StatelessWidget {
   const ResponsiveContent({
     super.key,
     required this.child,
-    this.maxWidth = 900,
+    this.maxWidth = 1400,
   });
 
   final Widget child;
