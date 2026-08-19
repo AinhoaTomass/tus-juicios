@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/hairline_card.dart';
+import '../../../core/widgets/responsive_card_grid.dart';
 import '../domain/cliente.dart';
 import 'clientes_providers.dart';
 
@@ -59,13 +60,11 @@ class PapeleraScreen extends ConsumerWidget {
           if (clientes.isEmpty) {
             return const Center(child: Text('La papelera está vacía.'));
           }
-          return ListView.separated(
+          return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            itemCount: clientes.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final cliente = clientes[index];
-              return HairlineCard(
+            child: ResponsiveCardGrid<Cliente>(
+              items: clientes,
+              itemBuilder: (context, cliente) => HairlineCard(
                 child: Row(
                   children: [
                     Expanded(
@@ -90,8 +89,8 @@ class PapeleraScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-              );
-            },
+              ),
+            ),
           );
         },
       ),

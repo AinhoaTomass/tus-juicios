@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
+import '../../../core/widgets/responsive_card_grid.dart';
 import '../../../core/widgets/responsive_content.dart';
 import '../domain/cliente.dart';
 import 'procedimientos_providers.dart';
@@ -75,14 +76,11 @@ class _ProcedimientosListaScreenState
                           onRefresh: () => ref
                               .read(procedimientosListaProvider.notifier)
                               .refrescar(),
-                          child: ListView.separated(
+                          child: SingleChildScrollView(
                             padding: const EdgeInsets.all(16),
-                            itemCount: filtrados.length,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(height: 8),
-                            itemBuilder: (context, index) {
-                              final procedimiento = filtrados[index];
-                              return HairlineCard(
+                            child: ResponsiveCardGrid<Procedimiento>(
+                              items: filtrados,
+                              itemBuilder: (context, procedimiento) => HairlineCard(
                                 onTap: () => context.go(
                                   '/clientes/${procedimiento.clienteId}/procedimientos/${procedimiento.id}/editar',
                                 ),
@@ -125,8 +123,8 @@ class _ProcedimientosListaScreenState
                                     ),
                                   ],
                                 ),
-                              );
-                            },
+                              ),
+                            ),
                           ),
                         ),
                 ),

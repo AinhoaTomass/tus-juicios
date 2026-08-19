@@ -7,6 +7,7 @@ import 'package:printing/printing.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/filtro_chips.dart';
 import '../../../core/widgets/hairline_card.dart';
+import '../../../core/widgets/responsive_card_grid.dart';
 import '../../../core/widgets/stat_tile.dart';
 import '../../ajustes/presentation/ajustes_providers.dart';
 import '../data/factura_pdf.dart';
@@ -102,57 +103,55 @@ class _FacturasScreenState extends ConsumerState<FacturasScreen> {
                     child: Center(child: Text('No hay facturas en este filtro.')),
                   )
                 else
-                  ...filtradas.map(
-                    (factura) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: HairlineCard(
-                        onTap: () => context.go('/facturas/${factura.id}/editar'),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    '${factura.numero} · ${factura.clienteNombre ?? 'Cliente'}',
-                                    style: Theme.of(context).textTheme.titleMedium,
-                                  ),
+                  ResponsiveCardGrid<Factura>(
+                    items: filtradas,
+                    itemBuilder: (context, factura) => HairlineCard(
+                      onTap: () => context.go('/facturas/${factura.id}/editar'),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${factura.numero} · ${factura.clienteNombre ?? 'Cliente'}',
+                                  style: Theme.of(context).textTheme.titleMedium,
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.picture_as_pdf_outlined, size: 20),
-                                  tooltip: 'Ver PDF',
-                                  onPressed: () => _verPdf(factura),
-                                ),
-                                EstadoChip(
-                                  label: factura.estado.name,
-                                  tono: _tono(factura.estado),
-                                ),
-                              ],
-                            ),
-                            if (factura.concepto != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                '${factura.concepto} · '
-                                '${DateFormat('MMMM', 'es_ES').format(factura.fecha)}',
-                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.picture_as_pdf_outlined, size: 20),
+                                tooltip: 'Ver PDF',
+                                onPressed: () => _verPdf(factura),
+                              ),
+                              EstadoChip(
+                                label: factura.estado.name,
+                                tono: _tono(factura.estado),
                               ),
                             ],
-                            const SizedBox(height: 6),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  '${factura.importe.toStringAsFixed(2)} €',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                Text(
-                                  '${factura.fecha.day}/${factura.fecha.month}/${factura.fecha.year}',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              ],
+                          ),
+                          if (factura.concepto != null) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              '${factura.concepto} · '
+                              '${DateFormat('MMMM', 'es_ES').format(factura.fecha)}',
+                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ],
-                        ),
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${factura.importe.toStringAsFixed(2)} €',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              Text(
+                                '${factura.fecha.day}/${factura.fecha.month}/${factura.fecha.year}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ),
