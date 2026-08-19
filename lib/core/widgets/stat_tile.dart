@@ -35,30 +35,30 @@ class StatTile extends StatelessWidget {
 }
 
 /// Cuadrícula de [StatTile], usada al principio de Inicio, Rentas y
-/// Facturas. En móvil son 2 columnas; en pantallas más anchas (tablet/web)
-/// pasan a 3 o 4 para que las tarjetas no queden enormes con poco contenido.
+/// Facturas. Cada tarjeta tiene un ancho máximo fijo y una altura que se
+/// ajusta a su contenido (no a una relación de aspecto), así que en
+/// pantallas anchas aparecen más columnas en vez de tarjetas enormes con
+/// mucho hueco vacío.
 class StatTileGrid extends StatelessWidget {
   const StatTileGrid({super.key, required this.tiles});
 
   final List<StatTile> tiles;
 
+  static const _anchoMaximo = 220.0;
+  static const _espacio = 8.0;
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columnas = switch (constraints.maxWidth) {
-          > 700 => 4,
-          > 480 => 3,
-          _ => 2,
-        };
-        return GridView.count(
-          crossAxisCount: columnas,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-          childAspectRatio: 1.9,
-          children: tiles,
+        var columnas =
+            (constraints.maxWidth / (_anchoMaximo + _espacio)).floor().clamp(1, tiles.length);
+        if (columnas < 2 && tiles.length >= 2) columnas = 2;
+        final anchoTarjeta = (constraints.maxWidth - _espacio * (columnas - 1)) / columnas;
+        return Wrap(
+          spacing: _espacio,
+          runSpacing: _espacio,
+          children: tiles.map((tile) => SizedBox(width: anchoTarjeta, child: tile)).toList(),
         );
       },
     );
