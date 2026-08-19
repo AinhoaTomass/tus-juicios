@@ -15,8 +15,8 @@ class EventoRepositorySupabase implements EventoRepository {
     final rows = await _client
         .from('eventos')
         .select('*, clientes(nombre)')
-        .order('fecha')
-        .order('hora');
+        .order('fecha', ascending: true)
+        .order('hora', ascending: true);
     return rows.map((row) => row.toEvento()).toList();
   }
 

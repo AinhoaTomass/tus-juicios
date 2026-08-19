@@ -25,7 +25,7 @@ class ProcedimientoRepositorySupabase implements ProcedimientoRepository {
         .from('procedimientos')
         .select()
         .eq('cliente_id', clienteId)
-        .order('created_at');
+        .order('created_at', ascending: true);
     return rows.map((row) => row.toProcedimiento()).toList();
   }
 
