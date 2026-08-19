@@ -16,7 +16,7 @@ class ClienteRepositorySupabase implements ClienteRepository {
         .from('clientes')
         .select()
         .isFilter('eliminado_en', null)
-        .order('nombre');
+        .order('nombre', ascending: true);
     return rows.map((row) => row.toCliente()).toList();
   }
 
