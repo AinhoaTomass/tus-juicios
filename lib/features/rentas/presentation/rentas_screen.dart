@@ -121,7 +121,7 @@ class _RentasScreenState extends ConsumerState<RentasScreen> {
                               style: Theme.of(context)
                                   .textTheme
                                   .labelMedium
-                                  ?.copyWith(color: AppTheme.accent),
+                                  ?.copyWith(color: AppTheme.of(context).accent),
                             ),
                             if (renta.resultado != null) ...[
                               const SizedBox(height: 6),

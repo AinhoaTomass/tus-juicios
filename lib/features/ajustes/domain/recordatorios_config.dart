@@ -1,5 +1,7 @@
-/// Preferencias del usuario para los recordatorios locales (no se guardan
-/// en Supabase: son de este dispositivo, no datos del despacho).
+/// Preferencias del usuario para los recordatorios locales. La preferencia
+/// se guarda en Supabase (ligada al usuario); la programación real del
+/// recordatorio, al ser una notificación del sistema operativo, se hace en
+/// cada dispositivo por separado a partir de esta preferencia.
 class RecordatoriosConfig {
   const RecordatoriosConfig({
     this.citasActivo = true,

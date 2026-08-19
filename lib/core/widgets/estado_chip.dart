@@ -12,10 +12,10 @@ class EstadoChip extends StatelessWidget {
   final String label;
   final EstadoTono tono;
 
-  Color get _color => switch (tono) {
-        EstadoTono.neutro => AppTheme.ink,
+  Color _color(BuildContext context) => switch (tono) {
+        EstadoTono.neutro => AppTheme.of(context).ink,
         EstadoTono.exito => const Color(0xFF3F7D4F),
-        EstadoTono.aviso => AppTheme.accent,
+        EstadoTono.aviso => AppTheme.of(context).accent,
         EstadoTono.urgente => const Color(0xFFB33A3A),
       };
 
@@ -24,7 +24,7 @@ class EstadoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _color;
+    final color = _color(context);
     final estilo = Theme.of(context).textTheme.labelMedium?.copyWith(
           color: color,
           fontWeight: FontWeight.w600,

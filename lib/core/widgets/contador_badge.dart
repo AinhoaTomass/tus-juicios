@@ -11,15 +11,16 @@ class ContadorBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = AppTheme.of(context).accent;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        border: Border.all(color: AppTheme.accent),
+        border: Border.all(color: accent),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         '$valor',
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppTheme.accent),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: accent),
       ),
     );
   }

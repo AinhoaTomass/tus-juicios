@@ -171,13 +171,15 @@ class _SeccionDocumentosState extends ConsumerState<SeccionDocumentos> {
                       width: 10,
                       height: 10,
                       margin: const EdgeInsets.only(top: 4),
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppTheme.accent,
+                        color: AppTheme.of(context).accent,
                       ),
                     ),
                     if (i != documentos.length - 1)
-                      Expanded(child: Container(width: 1.5, color: AppTheme.hairline)),
+                      Expanded(
+                        child: Container(width: 1.5, color: AppTheme.of(context).hairline),
+                      ),
                   ],
                 ),
                 const SizedBox(width: 12),

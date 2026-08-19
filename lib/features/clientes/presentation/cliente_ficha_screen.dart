@@ -100,7 +100,7 @@ class ClienteFichaScreen extends ConsumerWidget {
                     style: Theme.of(context)
                         .textTheme
                         .labelMedium
-                        ?.copyWith(color: AppTheme.accent),
+                        ?.copyWith(color: AppTheme.of(context).accent),
                   ),
                   if (cliente.resumen != null) ...[
                     const SizedBox(height: 12),
@@ -291,7 +291,7 @@ class ClienteFichaScreen extends ConsumerWidget {
                                       style: Theme.of(context)
                                           .textTheme
                                           .labelMedium
-                                          ?.copyWith(color: AppTheme.accent),
+                                          ?.copyWith(color: AppTheme.of(context).accent),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(nota.titulo, style: Theme.of(context).textTheme.titleSmall),

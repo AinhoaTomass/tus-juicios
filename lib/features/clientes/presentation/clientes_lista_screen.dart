@@ -141,7 +141,7 @@ class _ClienteCard extends StatelessWidget {
               if (cliente.nifCif != null) cliente.nifCif!,
               cliente.tipo == TipoCliente.fisica ? 'FÍSICA' : 'JURÍDICA',
             ].join(' · '),
-            style: textTheme.labelMedium?.copyWith(color: AppTheme.accent),
+            style: textTheme.labelMedium?.copyWith(color: AppTheme.of(context).accent),
           ),
           if (cliente.resumen != null) ...[
             const SizedBox(height: 6),
@@ -151,7 +151,7 @@ class _ClienteCard extends StatelessWidget {
             const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.event_outlined, size: 16, color: AppTheme.mutedInk),
+                Icon(Icons.event_outlined, size: 16, color: AppTheme.of(context).mutedInk),
                 const SizedBox(width: 6),
                 Text(
                   'Vence ${cliente.fechaVencimiento!.day}/${cliente.fechaVencimiento!.month}',

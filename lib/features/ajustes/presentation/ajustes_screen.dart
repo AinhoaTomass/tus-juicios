@@ -16,9 +16,16 @@ class AjustesScreen extends ConsumerWidget {
 
   String _etiquetaHora(int hora) => '${hora.toString().padLeft(2, '0')}:00';
 
+  static const _opcionesTema = [
+    (ThemeMode.system, 'Sistema'),
+    (ThemeMode.light, 'Claro'),
+    (ThemeMode.dark, 'Oscuro'),
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final configAsync = ref.watch(recordatoriosConfigProvider);
+    final temaModo = ref.watch(temaModoProvider).value ?? ThemeMode.system;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Ajustes')),
@@ -35,6 +42,29 @@ class AjustesScreen extends ConsumerWidget {
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                Text(
+                  'Apariencia',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                SegmentedButton<ThemeMode>(
+                  showSelectedIcon: false,
+                  segments: _opcionesTema
+                      .map(
+                        (opcion) => ButtonSegment(
+                          value: opcion.$1,
+                          label: Text(opcion.$2),
+                        ),
+                      )
+                      .toList(),
+                  selected: {temaModo},
+                  onSelectionChanged: (seleccion) => ref
+                      .read(temaModoProvider.notifier)
+                      .actualizar(seleccion.first),
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
                 Text(
                   'Recordatorios',
                   style: Theme.of(context).textTheme.titleMedium,

@@ -9,6 +9,50 @@ part of 'ajustes_providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(TemaModoNotifier)
+final temaModoProvider = TemaModoNotifierProvider._();
+
+final class TemaModoNotifierProvider
+    extends $AsyncNotifierProvider<TemaModoNotifier, ThemeMode> {
+  TemaModoNotifierProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'temaModoProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$temaModoNotifierHash();
+
+  @$internal
+  @override
+  TemaModoNotifier create() => TemaModoNotifier();
+}
+
+String _$temaModoNotifierHash() => r'e07ef2fecf47ac3f7b00da41e7ac6ecd21baf1c4';
+
+abstract class _$TemaModoNotifier extends $AsyncNotifier<ThemeMode> {
+  FutureOr<ThemeMode> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<ThemeMode>, ThemeMode>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<ThemeMode>, ThemeMode>,
+              AsyncValue<ThemeMode>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(RecordatoriosConfigNotifier)
 final recordatoriosConfigProvider = RecordatoriosConfigNotifierProvider._();
 
@@ -38,7 +82,7 @@ final class RecordatoriosConfigNotifierProvider
 }
 
 String _$recordatoriosConfigNotifierHash() =>
-    r'93cadb9c7a1e8a690f82563d9baae23048fec283';
+    r'a81d42628e170a76ac910de06b48c4c3220d8a7b';
 
 abstract class _$RecordatoriosConfigNotifier
     extends $AsyncNotifier<RecordatoriosConfig> {
@@ -85,7 +129,7 @@ final class DatosDespachoNotifierProvider
 }
 
 String _$datosDespachoNotifierHash() =>
-    r'8cf67ad3bc1226706b330a79467f58d657dafc07';
+    r'1334ba88df97d043b9a4855f47a69855dddfa9f1';
 
 abstract class _$DatosDespachoNotifier extends $AsyncNotifier<DatosDespacho> {
   FutureOr<DatosDespacho> build();

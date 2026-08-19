@@ -114,11 +114,14 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.calendar_today_outlined, size: 15, color: AppTheme.mutedInk),
+              Icon(Icons.calendar_today_outlined, size: 15, color: AppTheme.of(context).mutedInk),
               const SizedBox(width: 6),
               Text(
                 _fechaHoy,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppTheme.mutedInk),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.copyWith(color: AppTheme.of(context).mutedInk),
               ),
             ],
           ),

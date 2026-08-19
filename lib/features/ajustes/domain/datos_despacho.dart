@@ -1,5 +1,5 @@
 /// Datos del despacho, para que aparezcan como emisor en el PDF de las
-/// facturas. Se guardan en este dispositivo, no en Supabase.
+/// facturas. Se guardan en Supabase, ligados al usuario.
 class DatosDespacho {
   const DatosDespacho({this.nombre = '', this.nifCif = '', this.direccion = ''});
 

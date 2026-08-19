@@ -48,7 +48,7 @@ class NotasScreen extends ConsumerWidget {
                                   style: Theme.of(context)
                                       .textTheme
                                       .labelMedium
-                                      ?.copyWith(color: AppTheme.accent),
+                                      ?.copyWith(color: AppTheme.of(context).accent),
                                 ),
                                 if (nota.clienteNombre != null)
                                   EstadoChip(label: nota.clienteNombre!),

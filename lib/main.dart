@@ -6,6 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'core/network/supabase_client.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/ajustes/presentation/ajustes_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,11 +21,14 @@ class TusJuiciosApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    final temaModo = ref.watch(temaModoProvider).value ?? ThemeMode.system;
 
     return MaterialApp.router(
       title: 'TusJuicios',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: temaModo,
       locale: const Locale('es', 'ES'),
       supportedLocales: const [Locale('es', 'ES')],
       localizationsDelegates: const [
