@@ -6,8 +6,6 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
-import '../../../core/widgets/responsive_card_grid.dart';
-import '../domain/nota.dart';
 import 'notas_providers.dart';
 
 class NotasScreen extends ConsumerWidget {
@@ -34,38 +32,40 @@ class NotasScreen extends ConsumerWidget {
                     child: Center(child: Text('Todavía no hay notas.')),
                   )
                 else
-                  ResponsiveCardGrid<Nota>(
-                    items: notas,
-                    itemBuilder: (context, nota) => HairlineCard(
-                      onTap: () => context.go('/notas/${nota.id}/editar'),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                DateFormat('d MMM', 'es_ES').format(nota.fecha).toUpperCase(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium
-                                    ?.copyWith(color: AppTheme.of(context).accent),
-                              ),
-                              if (nota.clienteNombre != null)
-                                EstadoChip(label: nota.clienteNombre!),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(nota.titulo, style: Theme.of(context).textTheme.titleMedium),
-                          if (nota.contenido != null) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              nota.contenido!,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
+                  ...notas.map(
+                    (nota) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: HairlineCard(
+                        onTap: () => context.go('/notas/${nota.id}/editar'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  DateFormat('d MMM', 'es_ES').format(nota.fecha).toUpperCase(),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelMedium
+                                      ?.copyWith(color: AppTheme.of(context).accent),
+                                ),
+                                if (nota.clienteNombre != null)
+                                  EstadoChip(label: nota.clienteNombre!),
+                              ],
                             ),
+                            const SizedBox(height: 4),
+                            Text(nota.titulo, style: Theme.of(context).textTheme.titleMedium),
+                            if (nota.contenido != null) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                nota.contenido!,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ),

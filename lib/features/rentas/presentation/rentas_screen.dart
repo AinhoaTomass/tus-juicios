@@ -6,7 +6,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/filtro_chips.dart';
 import '../../../core/widgets/hairline_card.dart';
-import '../../../core/widgets/responsive_card_grid.dart';
 import '../../../core/widgets/stat_tile.dart';
 import '../data/renta_mapper.dart';
 import '../domain/renta.dart';
@@ -94,51 +93,53 @@ class _RentasScreenState extends ConsumerState<RentasScreen> {
                     child: Center(child: Text('No hay rentas en este filtro.')),
                   )
                 else
-                  ResponsiveCardGrid<Renta>(
-                    items: filtradas,
-                    itemBuilder: (context, renta) => HairlineCard(
-                      onTap: () => context.go('/rentas/${renta.id}/editar'),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  renta.clienteNombre ?? 'Cliente',
-                                  style: Theme.of(context).textTheme.titleMedium,
+                  ...filtradas.map(
+                    (renta) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: HairlineCard(
+                        onTap: () => context.go('/rentas/${renta.id}/editar'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    renta.clienteNombre ?? 'Cliente',
+                                    style: Theme.of(context).textTheme.titleMedium,
+                                  ),
                                 ),
-                              ),
-                              EstadoChip(
-                                label: renta.estado.etiqueta,
-                                tono: _tono(renta.estado),
+                                EstadoChip(
+                                  label: renta.estado.etiqueta,
+                                  tono: _tono(renta.estado),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'RENTA ${renta.ejercicio}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(color: AppTheme.of(context).accent),
+                            ),
+                            if (renta.resultado != null) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                'Resultado: ${renta.resultado}',
+                                style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'RENTA ${renta.ejercicio}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelMedium
-                                ?.copyWith(color: AppTheme.of(context).accent),
-                          ),
-                          if (renta.resultado != null) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              'Resultado: ${renta.resultado}',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
+                            if (renta.fecha != null) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                '${renta.estado == EstadoRenta.presentada ? 'Presentada' : 'Límite'} '
+                                '${renta.fecha!.day}/${renta.fecha!.month}',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
                           ],
-                          if (renta.fecha != null) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              '${renta.estado == EstadoRenta.presentada ? 'Presentada' : 'Límite'} '
-                              '${renta.fecha!.day}/${renta.fecha!.month}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ],
+                        ),
                       ),
                     ),
                   ),

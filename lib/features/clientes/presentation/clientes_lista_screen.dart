@@ -6,7 +6,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/filtro_chips.dart';
 import '../../../core/widgets/hairline_card.dart';
-import '../../../core/widgets/responsive_card_grid.dart';
 import '../domain/cliente.dart';
 import 'clientes_providers.dart';
 import 'procedimientos_providers.dart';
@@ -96,9 +95,11 @@ class _ClientesListaScreenState extends ConsumerState<ClientesListaScreen> {
                     child: Center(child: Text('No se han encontrado clientes.')),
                   )
                 else
-                  ResponsiveCardGrid<Cliente>(
-                    items: filtrados,
-                    itemBuilder: (context, cliente) => _ClienteCard(cliente: cliente),
+                  ...filtrados.map(
+                    (cliente) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _ClienteCard(cliente: cliente),
+                    ),
                   ),
                 const SizedBox(height: 16),
                 ElevatedButton(

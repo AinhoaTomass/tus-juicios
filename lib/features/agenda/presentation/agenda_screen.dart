@@ -5,7 +5,6 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
-import '../../../core/widgets/responsive_card_grid.dart';
 import '../domain/evento.dart';
 import 'eventos_providers.dart';
 
@@ -78,11 +77,13 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
               Expanded(
                 child: eventosSeleccionados.isEmpty
                     ? const Center(child: Text('Sin eventos este día.'))
-                    : SingleChildScrollView(
+                    : ListView.separated(
                         padding: const EdgeInsets.all(16),
-                        child: ResponsiveCardGrid<Evento>(
-                          items: eventosSeleccionados,
-                          itemBuilder: (context, evento) => HairlineCard(
+                        itemCount: eventosSeleccionados.length,
+                        separatorBuilder: (context, index) => const SizedBox(height: 8),
+                        itemBuilder: (context, index) {
+                          final evento = eventosSeleccionados[index];
+                          return HairlineCard(
                             onTap: () => context.go('/agenda/${evento.id}/editar'),
                             child: Row(
                               children: [
@@ -117,8 +118,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                 ),
                               ],
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
               ),
             ],
