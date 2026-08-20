@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
-import '../../../core/widgets/responsive_card_grid.dart';
-import '../../notas/domain/nota.dart';
 import '../../notas/presentation/notas_providers.dart';
 import '../domain/cliente.dart';
 import 'clientes_providers.dart';
@@ -276,35 +274,42 @@ class ClienteFichaScreen extends ConsumerWidget {
                     if (notas.isEmpty) {
                       return const Text('Sin notas.');
                     }
-                    return ResponsiveCardGrid<Nota>(
-                      items: notas,
-                      itemBuilder: (context, nota) => HairlineCard(
-                        padding: const EdgeInsets.all(12),
-                        onTap: () => context.go('/clientes/$clienteId/notas/${nota.id}/editar'),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${nota.fecha.day}/${nota.fecha.month}/${nota.fecha.year}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
-                                  ?.copyWith(color: AppTheme.of(context).accent),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(nota.titulo, style: Theme.of(context).textTheme.titleSmall),
-                            if (nota.contenido != null) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                nota.contenido!,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall,
+                    return Column(
+                      children: notas
+                          .map(
+                            (nota) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: HairlineCard(
+                                padding: const EdgeInsets.all(12),
+                                onTap: () =>
+                                    context.go('/clientes/$clienteId/notas/${nota.id}/editar'),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '${nota.fecha.day}/${nota.fecha.month}/${nota.fecha.year}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium
+                                          ?.copyWith(color: AppTheme.of(context).accent),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(nota.titulo, style: Theme.of(context).textTheme.titleSmall),
+                                    if (nota.contenido != null) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        nota.contenido!,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
-                            ],
-                          ],
-                        ),
-                      ),
+                            ),
+                          )
+                          .toList(),
                     );
                   },
                 );
