@@ -22,17 +22,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   bool _mismoDia(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  String _etiquetaTipo(TipoEvento tipo) => switch (tipo) {
-        TipoEvento.juicio => 'Juicio',
-        TipoEvento.smac => 'SMAC',
-        TipoEvento.conciliacion => 'Conciliación',
-      };
+  String _etiquetaVinculo(Evento evento) => evento.clienteId != null ? 'Cliente' : 'Personal';
 
-  EstadoTono _tonoTipo(TipoEvento tipo) => switch (tipo) {
-        TipoEvento.juicio => EstadoTono.urgente,
-        TipoEvento.smac => EstadoTono.aviso,
-        TipoEvento.conciliacion => EstadoTono.neutro,
-      };
+  EstadoTono _tonoVinculo(Evento evento) =>
+      evento.clienteId != null ? EstadoTono.neutro : EstadoTono.aviso;
 
   @override
   Widget build(BuildContext context) {
@@ -92,10 +85,13 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        evento.clienteNombre ?? 'Cliente',
+                                        evento.clienteNombre ??
+                                            evento.descripcion ??
+                                            'Evento personal',
                                         style: Theme.of(context).textTheme.titleMedium,
                                       ),
-                                      if (evento.descripcion != null) ...[
+                                      if (evento.clienteNombre != null &&
+                                          evento.descripcion != null) ...[
                                         const SizedBox(height: 4),
                                         Text(
                                           evento.descripcion!,
@@ -113,8 +109,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                   ),
                                 ),
                                 EstadoChip(
-                                  label: _etiquetaTipo(evento.tipo),
-                                  tono: _tonoTipo(evento.tipo),
+                                  label: _etiquetaVinculo(evento),
+                                  tono: _tonoVinculo(evento),
                                 ),
                               ],
                             ),

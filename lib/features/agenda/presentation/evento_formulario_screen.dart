@@ -21,9 +21,10 @@ class EventoFormularioScreen extends ConsumerStatefulWidget {
 class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descripcionCtrl = TextEditingController();
+  bool _esCliente = true;
   String? _clienteId;
   String? _clienteError;
-  TipoEvento _tipo = TipoEvento.juicio;
+  TipoEvento _tipo = TipoEvento.otro;
   DateTime _fecha = DateTime.now();
   TimeOfDay? _hora;
   bool _cargado = false;
@@ -46,6 +47,7 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
 
   void _rellenarSiEsEdicion(Evento evento) {
     if (_cargado) return;
+    _esCliente = evento.clienteId != null;
     _clienteId = evento.clienteId;
     _tipo = evento.tipo;
     _fecha = evento.fecha;
@@ -79,13 +81,14 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
   }
 
   Future<void> _guardar() async {
-    setState(() => _clienteError = _clienteId == null ? 'Obligatorio' : null);
-    if (!_formKey.currentState!.validate() || _clienteId == null) return;
+    setState(() => _clienteError = (_esCliente && _clienteId == null) ? 'Obligatorio' : null);
+    if (!_formKey.currentState!.validate()) return;
+    if (_esCliente && _clienteId == null) return;
 
     final repo = ref.read(eventoRepositoryProvider);
     final evento = Evento(
       id: widget.eventoId ?? '',
-      clienteId: _clienteId!,
+      clienteId: _esCliente ? _clienteId : null,
       tipo: _tipo,
       fecha: _fecha,
       hora: _hora == null
@@ -94,10 +97,19 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
       descripcion: _descripcionCtrl.text.trim().isEmpty ? null : _descripcionCtrl.text.trim(),
     );
 
-    if (widget.eventoId == null) {
-      await repo.crearEvento(evento);
-    } else {
-      await repo.actualizarEvento(evento);
+    try {
+      if (widget.eventoId == null) {
+        await repo.crearEvento(evento);
+      } else {
+        await repo.actualizarEvento(evento);
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar el evento: $error')),
+        );
+      }
+      return;
     }
 
     ref.invalidate(eventosListaProvider);
@@ -151,41 +163,45 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              clientesAsync.when(
-                loading: () => const LinearProgressIndicator(),
-                error: (error, _) => Text('Error al cargar clientes: $error'),
-                data: (clientes) => DropdownMenu<String>(
-                  expandedInsets: EdgeInsets.zero,
-                  initialSelection: _clienteId,
-                  label: const Text('Cliente'),
-                  errorText: _clienteError,
-                  dropdownMenuEntries: clientes
-                      .map((c) => DropdownMenuEntry(value: c.id, label: c.nombre))
-                      .toList(),
-                  onSelected: (value) {
-                    setState(() {
-                      _clienteId = value;
-                      _clienteError = null;
-                    });
-                    _marcarSucio();
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              SegmentedButton<TipoEvento>(
+              SegmentedButton<bool>(
                 showSelectedIcon: false,
                 segments: const [
-                  ButtonSegment(value: TipoEvento.juicio, label: Text('Juicio')),
-                  ButtonSegment(value: TipoEvento.smac, label: Text('SMAC')),
-                  ButtonSegment(value: TipoEvento.conciliacion, label: Text('Conciliación')),
+                  ButtonSegment(value: true, label: Text('Cliente')),
+                  ButtonSegment(value: false, label: Text('Personal')),
                 ],
-                selected: {_tipo},
+                selected: {_esCliente},
                 onSelectionChanged: (seleccion) {
-                  setState(() => _tipo = seleccion.first);
+                  setState(() {
+                    _esCliente = seleccion.first;
+                    if (!_esCliente) _clienteError = null;
+                  });
                   _marcarSucio();
                 },
               ),
               const SizedBox(height: 16),
+              if (_esCliente) ...[
+                clientesAsync.when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (error, _) => Text('Error al cargar clientes: $error'),
+                  data: (clientes) => DropdownMenu<String>(
+                    expandedInsets: EdgeInsets.zero,
+                    initialSelection: _clienteId,
+                    label: const Text('Cliente'),
+                    errorText: _clienteError,
+                    dropdownMenuEntries: clientes
+                        .map((c) => DropdownMenuEntry(value: c.id, label: c.nombre))
+                        .toList(),
+                    onSelected: (value) {
+                      setState(() {
+                        _clienteId = value;
+                        _clienteError = null;
+                      });
+                      _marcarSucio();
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text('Fecha'),
@@ -207,8 +223,13 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descripcionCtrl,
-                decoration: const InputDecoration(labelText: 'Descripción'),
+                decoration: const InputDecoration(
+                  labelText: '¿De qué se trata?',
+                  hintText: 'p.ej. Juicio, SMAC, ir al médico…',
+                ),
                 maxLines: 3,
+                validator: (value) =>
+                    (value == null || value.trim().isEmpty) ? 'Obligatorio' : null,
               ),
               const SizedBox(height: 24),
               Row(

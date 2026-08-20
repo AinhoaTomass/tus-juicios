@@ -58,12 +58,6 @@ class NotificacionesService {
     _inicializado = true;
   }
 
-  String _etiquetaTipoEvento(TipoEvento tipo) => switch (tipo) {
-        TipoEvento.juicio => 'Juicio',
-        TipoEvento.smac => 'SMAC',
-        TipoEvento.conciliacion => 'Conciliación',
-      };
-
   tz.TZDateTime _aLasHoras(DateTime fecha, int hora) =>
       tz.TZDateTime(tz.local, fecha.year, fecha.month, fecha.day, hora);
 
@@ -93,7 +87,8 @@ class NotificacionesService {
         await _plugin.zonedSchedule(
           id: id++,
           title: _tituloAviso('Cita', config.citasDiasAntes),
-          body: '${evento.clienteNombre ?? 'Cliente'} · ${_etiquetaTipoEvento(evento.tipo)}'
+          body: '${evento.clienteNombre ?? evento.descripcion ?? 'Personal'}'
+              '${evento.clienteNombre != null && evento.descripcion != null ? ' · ${evento.descripcion}' : ''}'
               '${evento.hora != null ? ' a las ${evento.hora}' : ''}',
           scheduledDate: aviso,
           notificationDetails: _detalles,

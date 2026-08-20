@@ -1,9 +1,9 @@
-enum TipoEvento { juicio, smac, conciliacion }
+enum TipoEvento { juicio, smac, conciliacion, otro }
 
 class Evento {
   const Evento({
     required this.id,
-    required this.clienteId,
+    this.clienteId,
     required this.tipo,
     required this.fecha,
     this.hora,
@@ -12,7 +12,9 @@ class Evento {
   });
 
   final String id;
-  final String clienteId;
+
+  /// Nulo cuando el evento no está vinculado a ningún cliente (p.ej. una cita médica).
+  final String? clienteId;
   final TipoEvento tipo;
   final DateTime fecha;
 

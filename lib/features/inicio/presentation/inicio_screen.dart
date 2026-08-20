@@ -10,7 +10,6 @@ import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
 import '../../../core/widgets/responsive_content.dart';
 import '../../../core/widgets/stat_tile.dart';
-import '../../agenda/domain/evento.dart';
 import '../../agenda/presentation/eventos_providers.dart';
 import '../../clientes/domain/cliente.dart';
 import '../../clientes/presentation/clientes_providers.dart';
@@ -57,12 +56,6 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
     final texto = DateFormat("EEEE, d 'de' MMMM", 'es_ES').format(DateTime.now());
     return texto[0].toUpperCase() + texto.substring(1);
   }
-
-  String _etiquetaTipoEvento(TipoEvento tipo) => switch (tipo) {
-        TipoEvento.juicio => 'Juicio',
-        TipoEvento.smac => 'SMAC',
-        TipoEvento.conciliacion => 'Conciliación',
-      };
 
   @override
   Widget build(BuildContext context) {
@@ -188,10 +181,10 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
               final deEventos = eventos.where((e) => !e.fecha.isBefore(ahora)).map<_ItemProximo>(
                     (e) => (
                       fecha: e.fecha,
-                      cliente: e.clienteNombre ?? 'Cliente',
+                      cliente: e.clienteNombre ?? e.descripcion ?? 'Evento personal',
                       subtitulo: '${e.fecha.day}/${e.fecha.month}/${e.fecha.year}'
                           '${e.hora != null ? ' · ${e.hora}' : ''}',
-                      etiqueta: _etiquetaTipoEvento(e.tipo),
+                      etiqueta: e.clienteId != null ? 'Cliente' : 'Personal',
                       tono: EstadoTono.neutro,
                       ruta: '/agenda/${e.id}/editar',
                     ),

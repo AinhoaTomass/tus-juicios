@@ -5,6 +5,7 @@ extension TipoEventoValor on TipoEvento {
         TipoEvento.juicio => 'Juicio',
         TipoEvento.smac => 'SMAC',
         TipoEvento.conciliacion => 'Conciliacion',
+        TipoEvento.otro => 'Otro',
       };
 }
 
@@ -12,13 +13,14 @@ TipoEvento _tipoEventoDesde(String valor) => switch (valor) {
       'Juicio' => TipoEvento.juicio,
       'SMAC' => TipoEvento.smac,
       'Conciliacion' => TipoEvento.conciliacion,
+      'Otro' => TipoEvento.otro,
       _ => throw ArgumentError('Tipo de evento desconocido: $valor'),
     };
 
 extension EventoMapper on Map<String, dynamic> {
   Evento toEvento() => Evento(
         id: this['id'] as String,
-        clienteId: this['cliente_id'] as String,
+        clienteId: this['cliente_id'] as String?,
         tipo: _tipoEventoDesde(this['tipo'] as String),
         fecha: DateTime.parse(this['fecha'] as String),
         hora: this['hora'] as String?,
