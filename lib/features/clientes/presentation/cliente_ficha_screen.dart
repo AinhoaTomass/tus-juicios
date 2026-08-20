@@ -87,6 +87,16 @@ class ClienteFichaScreen extends ConsumerWidget {
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                       ),
+                      if (cliente.datosIncompletos) ...[
+                        Tooltip(
+                          message: 'Faltan datos por completar',
+                          child: Icon(
+                            Icons.warning_amber_rounded,
+                            color: AppTheme.of(context).accent,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       if (cliente.esUrgente)
                         const EstadoChip(label: 'Urgente', tono: EstadoTono.urgente),
                     ],

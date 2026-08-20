@@ -131,6 +131,17 @@ class _ClienteCard extends StatelessWidget {
           Row(
             children: [
               Expanded(child: Text(cliente.nombre, style: textTheme.titleMedium)),
+              if (cliente.datosIncompletos) ...[
+                Tooltip(
+                  message: 'Faltan datos por completar',
+                  child: Icon(
+                    Icons.warning_amber_rounded,
+                    size: 20,
+                    color: AppTheme.of(context).accent,
+                  ),
+                ),
+                const SizedBox(width: 6),
+              ],
               if (cliente.esUrgente)
                 const EstadoChip(label: 'Urgente', tono: EstadoTono.urgente),
             ],

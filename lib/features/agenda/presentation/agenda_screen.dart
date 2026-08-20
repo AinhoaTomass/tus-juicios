@@ -22,10 +22,11 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
   bool _mismoDia(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  String _etiquetaVinculo(Evento evento) => evento.clienteId != null ? 'Cliente' : 'Personal';
+  String _etiquetaVinculo(Evento evento) =>
+      evento.categoria == CategoriaEvento.despacho ? 'Despacho' : 'Personal';
 
   EstadoTono _tonoVinculo(Evento evento) =>
-      evento.clienteId != null ? EstadoTono.neutro : EstadoTono.aviso;
+      evento.categoria == CategoriaEvento.despacho ? EstadoTono.neutro : EstadoTono.aviso;
 
   @override
   Widget build(BuildContext context) {

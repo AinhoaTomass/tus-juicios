@@ -4,9 +4,13 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
+import '../../clientes/domain/cliente.dart';
 import '../../clientes/presentation/clientes_providers.dart';
 import '../domain/evento.dart';
 import 'eventos_providers.dart';
+
+/// Con quién es la cita cuando el evento es de categoría "Despacho".
+enum _ContactoTipo { existente, nuevo, otro }
 
 /// Formulario de alta (eventoId nulo) o edición de un evento de agenda.
 class EventoFormularioScreen extends ConsumerStatefulWidget {
@@ -21,10 +25,11 @@ class EventoFormularioScreen extends ConsumerStatefulWidget {
 class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descripcionCtrl = TextEditingController();
-  bool _esCliente = true;
+  final _clienteNuevoCtrl = TextEditingController();
+  CategoriaEvento _categoria = CategoriaEvento.despacho;
+  _ContactoTipo _contactoTipo = _ContactoTipo.existente;
   String? _clienteId;
   String? _clienteError;
-  TipoEvento _tipo = TipoEvento.otro;
   DateTime _fecha = DateTime.now();
   TimeOfDay? _hora;
   bool _cargado = false;
@@ -42,14 +47,15 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
   @override
   void dispose() {
     _descripcionCtrl.dispose();
+    _clienteNuevoCtrl.dispose();
     super.dispose();
   }
 
   void _rellenarSiEsEdicion(Evento evento) {
     if (_cargado) return;
-    _esCliente = evento.clienteId != null;
+    _categoria = evento.categoria;
     _clienteId = evento.clienteId;
-    _tipo = evento.tipo;
+    _contactoTipo = evento.clienteId != null ? _ContactoTipo.existente : _ContactoTipo.otro;
     _fecha = evento.fecha;
     _descripcionCtrl.text = evento.descripcion ?? '';
     if (evento.hora != null) {
@@ -80,24 +86,43 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
     }
   }
 
-  Future<void> _guardar() async {
-    setState(() => _clienteError = (_esCliente && _clienteId == null) ? 'Obligatorio' : null);
-    if (!_formKey.currentState!.validate()) return;
-    if (_esCliente && _clienteId == null) return;
+  bool get _necesitaClienteExistente =>
+      _categoria == CategoriaEvento.despacho && _contactoTipo == _ContactoTipo.existente;
 
-    final repo = ref.read(eventoRepositoryProvider);
-    final evento = Evento(
-      id: widget.eventoId ?? '',
-      clienteId: _esCliente ? _clienteId : null,
-      tipo: _tipo,
-      fecha: _fecha,
-      hora: _hora == null
-          ? null
-          : '${_hora!.hour.toString().padLeft(2, '0')}:${_hora!.minute.toString().padLeft(2, '0')}',
-      descripcion: _descripcionCtrl.text.trim().isEmpty ? null : _descripcionCtrl.text.trim(),
-    );
+  Future<void> _guardar() async {
+    setState(() => _clienteError = (_necesitaClienteExistente && _clienteId == null) ? 'Obligatorio' : null);
+    if (!_formKey.currentState!.validate()) return;
+    if (_necesitaClienteExistente && _clienteId == null) return;
+
+    final esDespacho = _categoria == CategoriaEvento.despacho;
+    String? clienteId = esDespacho && _contactoTipo == _ContactoTipo.existente ? _clienteId : null;
 
     try {
+      if (esDespacho && _contactoTipo == _ContactoTipo.nuevo) {
+        final clienteCreado = await ref.read(clienteRepositoryProvider).crearCliente(
+              Cliente(
+                id: '',
+                nombre: _clienteNuevoCtrl.text.trim(),
+                tipo: TipoCliente.fisica,
+              ),
+            );
+        clienteId = clienteCreado.id;
+        ref.invalidate(clientesListaProvider);
+      }
+
+      final repo = ref.read(eventoRepositoryProvider);
+      final evento = Evento(
+        id: widget.eventoId ?? '',
+        clienteId: clienteId,
+        categoria: _categoria,
+        tipo: TipoEvento.otro,
+        fecha: _fecha,
+        hora: _hora == null
+            ? null
+            : '${_hora!.hour.toString().padLeft(2, '0')}:${_hora!.minute.toString().padLeft(2, '0')}',
+        descripcion: _descripcionCtrl.text.trim().isEmpty ? null : _descripcionCtrl.text.trim(),
+      );
+
       if (widget.eventoId == null) {
         await repo.crearEvento(evento);
       } else {
@@ -163,43 +188,68 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              SegmentedButton<bool>(
+              SegmentedButton<CategoriaEvento>(
                 showSelectedIcon: false,
                 segments: const [
-                  ButtonSegment(value: true, label: Text('Cliente')),
-                  ButtonSegment(value: false, label: Text('Personal')),
+                  ButtonSegment(value: CategoriaEvento.despacho, label: Text('Despacho')),
+                  ButtonSegment(value: CategoriaEvento.personal, label: Text('Personal')),
                 ],
-                selected: {_esCliente},
+                selected: {_categoria},
                 onSelectionChanged: (seleccion) {
                   setState(() {
-                    _esCliente = seleccion.first;
-                    if (!_esCliente) _clienteError = null;
+                    _categoria = seleccion.first;
+                    if (_categoria == CategoriaEvento.personal) _clienteError = null;
                   });
                   _marcarSucio();
                 },
               ),
               const SizedBox(height: 16),
-              if (_esCliente) ...[
-                clientesAsync.when(
-                  loading: () => const LinearProgressIndicator(),
-                  error: (error, _) => Text('Error al cargar clientes: $error'),
-                  data: (clientes) => DropdownMenu<String>(
-                    expandedInsets: EdgeInsets.zero,
-                    initialSelection: _clienteId,
-                    label: const Text('Cliente'),
-                    errorText: _clienteError,
-                    dropdownMenuEntries: clientes
-                        .map((c) => DropdownMenuEntry(value: c.id, label: c.nombre))
-                        .toList(),
-                    onSelected: (value) {
-                      setState(() {
-                        _clienteId = value;
-                        _clienteError = null;
-                      });
-                      _marcarSucio();
-                    },
-                  ),
+              if (_categoria == CategoriaEvento.despacho) ...[
+                SegmentedButton<_ContactoTipo>(
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(value: _ContactoTipo.existente, label: Text('Cliente existente')),
+                    ButtonSegment(value: _ContactoTipo.nuevo, label: Text('Cliente nuevo')),
+                    ButtonSegment(value: _ContactoTipo.otro, label: Text('Otro')),
+                  ],
+                  selected: {_contactoTipo},
+                  onSelectionChanged: (seleccion) {
+                    setState(() {
+                      _contactoTipo = seleccion.first;
+                      _clienteError = null;
+                    });
+                    _marcarSucio();
+                  },
                 ),
+                const SizedBox(height: 16),
+                if (_contactoTipo == _ContactoTipo.existente)
+                  clientesAsync.when(
+                    loading: () => const LinearProgressIndicator(),
+                    error: (error, _) => Text('Error al cargar clientes: $error'),
+                    data: (clientes) => DropdownMenu<String>(
+                      expandedInsets: EdgeInsets.zero,
+                      initialSelection: _clienteId,
+                      label: const Text('Cliente'),
+                      errorText: _clienteError,
+                      dropdownMenuEntries: clientes
+                          .map((c) => DropdownMenuEntry(value: c.id, label: c.nombre))
+                          .toList(),
+                      onSelected: (value) {
+                        setState(() {
+                          _clienteId = value;
+                          _clienteError = null;
+                        });
+                        _marcarSucio();
+                      },
+                    ),
+                  )
+                else if (_contactoTipo == _ContactoTipo.nuevo)
+                  TextFormField(
+                    controller: _clienteNuevoCtrl,
+                    decoration: const InputDecoration(labelText: 'Nombre del cliente nuevo'),
+                    validator: (value) =>
+                        (value == null || value.trim().isEmpty) ? 'Obligatorio' : null,
+                  ),
                 const SizedBox(height: 16),
               ],
               ListTile(

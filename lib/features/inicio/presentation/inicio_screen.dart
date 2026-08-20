@@ -10,6 +10,7 @@ import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
 import '../../../core/widgets/responsive_content.dart';
 import '../../../core/widgets/stat_tile.dart';
+import '../../agenda/domain/evento.dart';
 import '../../agenda/presentation/eventos_providers.dart';
 import '../../clientes/domain/cliente.dart';
 import '../../clientes/presentation/clientes_providers.dart';
@@ -184,7 +185,7 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
                       cliente: e.clienteNombre ?? e.descripcion ?? 'Evento personal',
                       subtitulo: '${e.fecha.day}/${e.fecha.month}/${e.fecha.year}'
                           '${e.hora != null ? ' · ${e.hora}' : ''}',
-                      etiqueta: e.clienteId != null ? 'Cliente' : 'Personal',
+                      etiqueta: e.categoria == CategoriaEvento.despacho ? 'Despacho' : 'Personal',
                       tono: EstadoTono.neutro,
                       ruta: '/agenda/${e.id}/editar',
                     ),

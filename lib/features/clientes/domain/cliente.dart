@@ -39,6 +39,11 @@ class Cliente {
     final dias = fechaVencimiento!.difference(DateTime.now()).inDays;
     return dias <= 3;
   }
+
+  /// Solo tiene el nombre (p.ej. dado de alta rápida desde un evento de
+  /// agenda): faltan sus datos de contacto por completar.
+  bool get datosIncompletos =>
+      nifCif == null && telefono == null && email == null && direccion == null;
 }
 
 class Procedimiento {
