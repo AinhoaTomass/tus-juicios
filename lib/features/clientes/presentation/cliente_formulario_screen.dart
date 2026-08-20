@@ -66,19 +66,6 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
     _cargado = true;
   }
 
-  Future<void> _seleccionarFechaVencimiento() async {
-    final fecha = await showDatePicker(
-      context: context,
-      initialDate: _fechaVencimiento ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (fecha != null) {
-      setState(() => _fechaVencimiento = fecha);
-      _marcarSucio();
-    }
-  }
-
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -202,33 +189,6 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
               controller: _notasCtrl,
               decoration: const InputDecoration(labelText: 'Notas'),
               maxLines: 3,
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Fecha de vencimiento'),
-              subtitle: Text(
-                _fechaVencimiento == null
-                    ? 'Sin fecha'
-                    : '${_fechaVencimiento!.day}/${_fechaVencimiento!.month}/${_fechaVencimiento!.year}',
-              ),
-              trailing: Wrap(
-                spacing: 4,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.calendar_today_outlined),
-                    onPressed: _seleccionarFechaVencimiento,
-                  ),
-                  if (_fechaVencimiento != null)
-                    IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        setState(() => _fechaVencimiento = null);
-                        _marcarSucio();
-                      },
-                    ),
-                ],
-              ),
             ),
             const SizedBox(height: 24),
             Row(
