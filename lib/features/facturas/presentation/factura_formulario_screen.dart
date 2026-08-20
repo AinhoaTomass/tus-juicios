@@ -86,18 +86,27 @@ class _FacturaFormularioScreenState extends ConsumerState<FacturaFormularioScree
       concepto: _conceptoCtrl.text.trim().isEmpty ? null : _conceptoCtrl.text.trim(),
     );
 
-    if (widget.facturaId == null) {
-      await repo.crearFactura(factura);
-    } else {
-      await repo.actualizarFactura(factura);
+    var mensaje = 'Factura guardada';
+    try {
+      if (widget.facturaId == null) {
+        final creada = await repo.crearFactura(factura);
+        mensaje = 'Factura nº ${creada.numero} guardada';
+      } else {
+        await repo.actualizarFactura(factura);
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al guardar la factura: $error')),
+        );
+      }
+      return;
     }
 
     ref.invalidate(facturasListaProvider);
     ref.read(formularioSucioProvider.notifier).limpiar();
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Factura guardada')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mensaje)));
       context.pop();
     }
   }
@@ -143,10 +152,12 @@ class _FacturaFormularioScreenState extends ConsumerState<FacturaFormularioScree
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              TextFormField(
-                controller: _numeroCtrl,
-                decoration: const InputDecoration(labelText: 'Número'),
-                validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Número'),
+                subtitle: Text(
+                  esEdicion ? _numeroCtrl.text : 'Se asignará automáticamente al guardar',
+                ),
               ),
               const SizedBox(height: 16),
               clientesAsync.when(

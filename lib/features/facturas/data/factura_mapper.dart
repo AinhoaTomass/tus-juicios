@@ -17,7 +17,9 @@ extension FacturaMapper on Map<String, dynamic> {
 
 extension FacturaToRow on Factura {
   Map<String, dynamic> toRow() => {
-        'numero': numero,
+        // Sin número todavía (alta): se omite para que la base de datos
+        // asigne el siguiente correlativo automáticamente.
+        if (numero.isNotEmpty) 'numero': numero,
         'cliente_id': clienteId,
         'importe': importe,
         'estado': estado.name,
