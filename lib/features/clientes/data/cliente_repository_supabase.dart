@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/formato/fechas.dart';
 import '../../../core/network/supabase_client.dart';
 import '../domain/cliente.dart';
 import '../domain/cliente_repository.dart';
@@ -57,7 +58,7 @@ class ClienteRepositorySupabase implements ClienteRepository {
   Future<void> moverAPapelera(String id) {
     return _client
         .from('clientes')
-        .update({'eliminado_en': DateTime.now().toIso8601String()})
+        .update({'eliminado_en': instanteParaBd(DateTime.now())})
         .eq('id', id);
   }
 

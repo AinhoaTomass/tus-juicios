@@ -1,3 +1,4 @@
+import '../../../core/formato/fechas.dart';
 import '../domain/documento.dart';
 
 extension DocumentoMapper on Map<String, dynamic> {
@@ -6,7 +7,7 @@ extension DocumentoMapper on Map<String, dynamic> {
         clienteId: this['cliente_id'] as String,
         nombreArchivo: this['nombre_archivo'] as String,
         storagePath: this['storage_path'] as String,
-        fechaSubida: DateTime.parse(this['fecha_subida'] as String),
+        fechaSubida: leerInstante(this['fecha_subida'] as String),
         procedimientoId: this['procedimiento_id'] as String?,
       );
 }

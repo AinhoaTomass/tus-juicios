@@ -1,3 +1,5 @@
+import '../../../core/formato/dias.dart';
+
 enum TipoCliente { fisica, juridica }
 
 enum EstadoProcedimiento { activo, pendiente, cerrado }
@@ -33,12 +35,11 @@ class Cliente {
   final DateTime? eliminadoEn;
   final List<Procedimiento> procedimientos;
 
-  /// Urgente si vence en <=3 días.
-  bool get esUrgente {
-    if (fechaVencimiento == null) return false;
-    final dias = fechaVencimiento!.difference(DateTime.now()).inDays;
-    return dias <= 3;
-  }
+  /// Urgente si vence en 3 días o menos (o ya ha vencido).
+  bool get esUrgente => esUrgenteEn(DateTime.now());
+
+  bool esUrgenteEn(DateTime hoy) =>
+      fechaVencimiento != null && diasHasta(fechaVencimiento!, hoy) <= 3;
 
   /// Solo tiene el nombre (p.ej. dado de alta rápida desde un evento de
   /// agenda): faltan sus datos de contacto por completar.
@@ -67,10 +68,10 @@ class Procedimiento {
 
   /// Vencido si tiene fecha meta pasada y sigue sin cerrarse. No cambia
   /// [estado]: es solo un aviso visual para que se revise manualmente.
-  bool get vencido {
-    if (fechaMeta == null || estado == EstadoProcedimiento.cerrado) return false;
-    final hoy = DateTime.now();
-    final inicioHoy = DateTime(hoy.year, hoy.month, hoy.day);
-    return fechaMeta!.isBefore(inicioHoy);
-  }
+  bool get vencido => vencidoEn(DateTime.now());
+
+  bool vencidoEn(DateTime hoy) =>
+      fechaMeta != null &&
+      estado != EstadoProcedimiento.cerrado &&
+      !esHoyOPosterior(fechaMeta!, hoy);
 }

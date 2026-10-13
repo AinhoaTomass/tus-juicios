@@ -12,6 +12,7 @@ import '../../../core/widgets/stat_tile.dart';
 import '../../ajustes/presentation/ajustes_providers.dart';
 import '../data/factura_pdf.dart';
 import '../domain/factura.dart';
+import '../domain/totales_facturas.dart';
 import 'facturas_providers.dart';
 
 class FacturasScreen extends ConsumerStatefulWidget {
@@ -54,11 +55,9 @@ class _FacturasScreenState extends ConsumerState<FacturasScreen> {
         error: (error, _) => Center(child: Text('Error al cargar facturas: $error')),
         data: (facturas) {
           final anio = DateTime.now().year;
-          final delAnio = facturas.where((f) => f.fecha.year == anio);
-          final facturado = delAnio.fold<double>(0, (suma, f) => suma + f.importe);
-          final pendienteCobro = facturas
-              .where((f) => f.estado == EstadoFactura.pendiente)
-              .fold<double>(0, (suma, f) => suma + f.importe);
+          final facturado = facturadoEnAnio(facturas, anio);
+          // Pendientes y vencidas, igual que en Inicio.
+          final pendienteCobro = pendienteDeCobro(facturas);
           final filtradas =
               _filtro == null ? facturas : facturas.where((f) => f.estado == _filtro).toList();
 

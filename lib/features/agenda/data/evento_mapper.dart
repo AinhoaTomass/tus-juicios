@@ -1,3 +1,4 @@
+import '../../../core/formato/fechas.dart';
 import '../domain/evento.dart';
 
 extension TipoEventoValor on TipoEvento {
@@ -36,7 +37,7 @@ extension EventoMapper on Map<String, dynamic> {
         clienteId: this['cliente_id'] as String?,
         categoria: _categoriaEventoDesde(this['categoria'] as String),
         tipo: _tipoEventoDesde(this['tipo'] as String),
-        fecha: DateTime.parse(this['fecha'] as String),
+        fecha: leerFecha(this['fecha'] as String),
         hora: this['hora'] as String?,
         descripcion: this['descripcion'] as String?,
         clienteNombre: (this['clientes'] as Map<String, dynamic>?)?['nombre'] as String?,
@@ -48,7 +49,7 @@ extension EventoToRow on Evento {
         'cliente_id': clienteId,
         'categoria': categoria.valor,
         'tipo': tipo.valor,
-        'fecha': fecha.toIso8601String(),
+        'fecha': fechaParaBd(fecha),
         'hora': hora,
         'descripcion': descripcion,
       };

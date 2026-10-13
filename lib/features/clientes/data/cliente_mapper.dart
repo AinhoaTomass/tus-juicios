@@ -1,3 +1,4 @@
+import '../../../core/formato/fechas.dart';
 import '../domain/cliente.dart';
 
 extension ClienteMapper on Map<String, dynamic> {
@@ -12,11 +13,11 @@ extension ClienteMapper on Map<String, dynamic> {
         resumen: this['resumen'] as String?,
         fechaVencimiento: this['fecha_vencimiento'] == null
             ? null
-            : DateTime.parse(this['fecha_vencimiento'] as String),
+            : leerFecha(this['fecha_vencimiento'] as String),
         notas: this['notas'] as String?,
         eliminadoEn: this['eliminado_en'] == null
             ? null
-            : DateTime.parse(this['eliminado_en'] as String),
+            : leerInstante(this['eliminado_en'] as String),
       );
 }
 
@@ -29,7 +30,7 @@ extension ClienteToRow on Cliente {
         'email': email,
         'direccion': direccion,
         'resumen': resumen,
-        'fecha_vencimiento': fechaVencimiento?.toIso8601String(),
+        'fecha_vencimiento': fechaVencimiento == null ? null : fechaParaBd(fechaVencimiento!),
         'notas': notas,
       };
 }

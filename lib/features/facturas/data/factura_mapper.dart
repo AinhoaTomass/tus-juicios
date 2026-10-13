@@ -1,3 +1,4 @@
+import '../../../core/formato/fechas.dart';
 import '../domain/factura.dart';
 
 extension FacturaMapper on Map<String, dynamic> {
@@ -7,7 +8,7 @@ extension FacturaMapper on Map<String, dynamic> {
         clienteId: this['cliente_id'] as String,
         importe: (this['importe'] as num).toDouble(),
         estado: EstadoFactura.values.byName(this['estado'] as String),
-        fecha: DateTime.parse(this['fecha'] as String),
+        fecha: leerFecha(this['fecha'] as String),
         concepto: this['concepto'] as String?,
         clienteNombre: (this['clientes'] as Map<String, dynamic>?)?['nombre'] as String?,
         clienteNifCif: (this['clientes'] as Map<String, dynamic>?)?['nif_cif'] as String?,
@@ -23,7 +24,7 @@ extension FacturaToRow on Factura {
         'cliente_id': clienteId,
         'importe': importe,
         'estado': estado.name,
-        'fecha': fecha.toIso8601String(),
+        'fecha': fechaParaBd(fecha),
         'concepto': concepto,
       };
 }

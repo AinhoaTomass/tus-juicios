@@ -9,6 +9,7 @@ import '../../../core/widgets/hairline_card.dart';
 import '../../../core/widgets/mostrar_error.dart';
 import '../../notas/presentation/notas_providers.dart';
 import '../domain/cliente.dart';
+import '../domain/contacto.dart';
 import 'clientes_providers.dart';
 import 'documentos_providers.dart';
 import 'procedimientos_providers.dart';
@@ -373,17 +374,6 @@ class _AccionesContacto extends StatelessWidget {
 
   final Cliente cliente;
 
-  /// Teléfono en formato internacional sin "+" para wa.me. Un número
-  /// español de 9 cifras sin prefijo se asume +34.
-  static String _numeroWhatsApp(String telefono) {
-    var digitos = telefono.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digitos.startsWith('00')) digitos = digitos.substring(2);
-    if (!telefono.trim().startsWith('+') && digitos.length == 9) {
-      digitos = '34$digitos';
-    }
-    return digitos;
-  }
-
   Future<void> _abrir(BuildContext context, Uri uri, String que) async {
     final messenger = ScaffoldMessenger.of(context);
     var abierto = false;
@@ -418,7 +408,7 @@ class _AccionesContacto extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () => _abrir(
               context,
-              Uri.https('wa.me', '/${_numeroWhatsApp(telefono)}'),
+              Uri.https('wa.me', '/${numeroWhatsApp(telefono)}'),
               'WhatsApp',
             ),
             icon: const Icon(Icons.chat_outlined, size: 18),

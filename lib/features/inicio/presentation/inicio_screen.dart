@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/formato/dias.dart';
 import '../../../core/formato/importe.dart';
 import '../../../core/network/supabase_client.dart';
 import '../../../core/theme/app_theme.dart';
@@ -17,6 +18,7 @@ import '../../clientes/domain/cliente.dart';
 import '../../clientes/presentation/clientes_providers.dart';
 import '../../clientes/presentation/procedimientos_providers.dart';
 import '../../facturas/domain/factura.dart';
+import '../../facturas/domain/totales_facturas.dart';
 import '../../facturas/presentation/facturas_providers.dart';
 
 /// Algo próximo que mostrar en Inicio: una cita de agenda o un procedimiento
@@ -67,19 +69,9 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
     final facturasAsync = ref.watch(facturasListaProvider);
 
     final ahora = DateTime.now();
-    final cobradoEsteMes = facturasAsync.value
-            ?.where(
-              (f) =>
-                  f.estado == EstadoFactura.pagada &&
-                  f.fecha.year == ahora.year &&
-                  f.fecha.month == ahora.month,
-            )
-            .fold<double>(0, (suma, f) => suma + f.importe) ??
-        0;
-    final pendienteCobro = facturasAsync.value
-            ?.where((f) => f.estado != EstadoFactura.pagada)
-            .fold<double>(0, (suma, f) => suma + f.importe) ??
-        0;
+    final facturas = facturasAsync.value ?? const <Factura>[];
+    final cobradoEsteMes = cobradoEnMes(facturas, ahora);
+    final pendienteCobro = pendienteDeCobro(facturas);
 
     // En pantallas anchas estos botones ya están en el panel lateral.
     final ocultarAccionesDeCuenta = MediaQuery.sizeOf(context).width >= anchoPanelLateral;
@@ -137,7 +129,7 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
               ),
               StatTile(
                 valor: procedimientosAsync.value
-                        ?.where((p) => p.estado.name == 'activo')
+                        ?.where((p) => p.estado == EstadoProcedimiento.activo)
                         .length
                         .toString() ??
                     '–',
@@ -146,7 +138,7 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
               ),
               StatTile(
                 valor: procedimientosAsync.value
-                        ?.where((p) => p.estado.name == 'pendiente')
+                        ?.where((p) => p.estado == EstadoProcedimiento.pendiente)
                         .length
                         .toString() ??
                     '–',
@@ -155,11 +147,7 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
               ),
               StatTile(
                 valor: eventosAsync.value
-                        ?.where(
-                          (e) =>
-                              !e.fecha.isBefore(DateTime.now()) &&
-                              !e.fecha.isAfter(DateTime.now().add(const Duration(days: 7))),
-                        )
+                        ?.where((e) => estaEnLosProximosDias(e.fecha, ahora, 7))
                         .length
                         .toString() ??
                     '–',
@@ -185,7 +173,7 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
             data: (eventos) {
               final ahora = DateTime.now();
 
-              final deEventos = eventos.where((e) => !e.fecha.isBefore(ahora)).map<_ItemProximo>(
+              final deEventos = eventos.where((e) => esHoyOPosterior(e.fecha, ahora)).map<_ItemProximo>(
                     (e) => (
                       fecha: e.fecha,
                       cliente: e.clienteNombre ?? e.descripcion ?? 'Evento personal',
@@ -202,7 +190,7 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
                     (p) =>
                         p.fechaMeta != null &&
                         p.estado != EstadoProcedimiento.cerrado &&
-                        !p.fechaMeta!.isBefore(ahora),
+                        esHoyOPosterior(p.fechaMeta!, ahora),
                   )
                   .map<_ItemProximo>(
                     (p) => (

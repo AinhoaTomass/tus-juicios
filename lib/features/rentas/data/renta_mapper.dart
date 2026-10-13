@@ -1,3 +1,4 @@
+import '../../../core/formato/fechas.dart';
 import '../domain/renta.dart';
 
 extension EstadoRentaValor on EstadoRenta {
@@ -28,7 +29,7 @@ extension RentaMapper on Map<String, dynamic> {
         ejercicio: this['ejercicio'] as int,
         estado: _estadoRentaDesde(this['estado'] as String),
         resultado: this['resultado'] as String?,
-        fecha: this['fecha'] == null ? null : DateTime.parse(this['fecha'] as String),
+        fecha: this['fecha'] == null ? null : leerFecha(this['fecha'] as String),
         clienteNombre: (this['clientes'] as Map<String, dynamic>?)?['nombre'] as String?,
       );
 }
@@ -39,6 +40,6 @@ extension RentaToRow on Renta {
         'ejercicio': ejercicio,
         'estado': estado.valor,
         'resultado': resultado,
-        'fecha': fecha?.toIso8601String(),
+        'fecha': fecha == null ? null : fechaParaBd(fecha!),
       };
 }

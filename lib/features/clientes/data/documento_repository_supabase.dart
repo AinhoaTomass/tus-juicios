@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/formato/fechas.dart';
 import '../../../core/network/supabase_client.dart';
 import '../domain/documento.dart';
 import '../domain/documento_repository.dart';
@@ -56,7 +57,7 @@ class DocumentoRepositorySupabase implements DocumentoRepository {
           'procedimiento_id': procedimientoId,
           'nombre_archivo': nombreArchivo,
           'storage_path': path,
-          'fecha_subida': fecha.toIso8601String(),
+          'fecha_subida': instanteParaBd(fecha),
         })
         .select()
         .single();
