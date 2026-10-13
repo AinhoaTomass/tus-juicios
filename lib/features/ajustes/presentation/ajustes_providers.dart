@@ -34,8 +34,15 @@ class TemaModoNotifier extends _$TemaModoNotifier {
   }
 
   Future<void> actualizar(ThemeMode modo) async {
+    final anterior = state;
     state = AsyncData(modo);
-    await _guardarFila({'tema_modo': modo.name});
+    try {
+      await _guardarFila({'tema_modo': modo.name});
+    } catch (_) {
+      // La pantalla ya mostraba el valor nuevo: se deshace si no se guardó.
+      state = anterior;
+      rethrow;
+    }
   }
 }
 
@@ -55,15 +62,22 @@ class RecordatoriosConfigNotifier extends _$RecordatoriosConfigNotifier {
   }
 
   Future<void> actualizar(RecordatoriosConfig config) async {
+    final anterior = state;
     state = AsyncData(config);
-    await _guardarFila({
-      'recordatorios_citas_activo': config.citasActivo,
-      'recordatorios_citas_dias_antes': config.citasDiasAntes,
-      'recordatorios_citas_hora': config.citasHora,
-      'recordatorios_procedimientos_activo': config.procedimientosActivo,
-      'recordatorios_procedimientos_dias_antes': config.procedimientosDiasAntes,
-      'recordatorios_procedimientos_hora': config.procedimientosHora,
-    });
+    try {
+      await _guardarFila({
+        'recordatorios_citas_activo': config.citasActivo,
+        'recordatorios_citas_dias_antes': config.citasDiasAntes,
+        'recordatorios_citas_hora': config.citasHora,
+        'recordatorios_procedimientos_activo': config.procedimientosActivo,
+        'recordatorios_procedimientos_dias_antes': config.procedimientosDiasAntes,
+        'recordatorios_procedimientos_hora': config.procedimientosHora,
+      });
+    } catch (_) {
+      // La pantalla ya mostraba el valor nuevo: se deshace si no se guardó.
+      state = anterior;
+      rethrow;
+    }
   }
 }
 
@@ -80,11 +94,18 @@ class DatosDespachoNotifier extends _$DatosDespachoNotifier {
   }
 
   Future<void> actualizar(DatosDespacho datos) async {
+    final anterior = state;
     state = AsyncData(datos);
-    await _guardarFila({
-      'despacho_nombre': datos.nombre,
-      'despacho_nif_cif': datos.nifCif,
-      'despacho_direccion': datos.direccion,
-    });
+    try {
+      await _guardarFila({
+        'despacho_nombre': datos.nombre,
+        'despacho_nif_cif': datos.nifCif,
+        'despacho_direccion': datos.direccion,
+      });
+    } catch (_) {
+      // La pantalla ya mostraba el valor nuevo: se deshace si no se guardó.
+      state = anterior;
+      rethrow;
+    }
   }
 }

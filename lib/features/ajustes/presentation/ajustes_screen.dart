@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/supabase_client.dart';
+import '../../../core/widgets/mostrar_error.dart';
 import '../../../core/widgets/responsive_content.dart';
 import '../../auth/presentation/cambiar_contrasena_dialog.dart';
 import '../domain/datos_despacho.dart';
@@ -37,9 +38,15 @@ class AjustesScreen extends ConsumerWidget {
           error: (error, _) =>
               Center(child: Text('Error al cargar ajustes: $error')),
           data: (config) {
-            Future<void> actualizar(RecordatoriosConfig nuevo) => ref
-                .read(recordatoriosConfigProvider.notifier)
-                .actualizar(nuevo);
+            Future<void> actualizar(RecordatoriosConfig nuevo) async {
+              try {
+                await ref.read(recordatoriosConfigProvider.notifier).actualizar(nuevo);
+              } catch (error) {
+                if (context.mounted) {
+                  mostrarError(context, 'No se pudo guardar el recordatorio', error);
+                }
+              }
+            }
 
             return ListView(
               padding: const EdgeInsets.all(16),
@@ -60,9 +67,15 @@ class AjustesScreen extends ConsumerWidget {
                       )
                       .toList(),
                   selected: {temaModo},
-                  onSelectionChanged: (seleccion) => ref
-                      .read(temaModoProvider.notifier)
-                      .actualizar(seleccion.first),
+                  onSelectionChanged: (seleccion) async {
+                    try {
+                      await ref.read(temaModoProvider.notifier).actualizar(seleccion.first);
+                    } catch (error) {
+                      if (context.mounted) {
+                        mostrarError(context, 'No se pudo guardar el tema', error);
+                      }
+                    }
+                  },
                 ),
                 const SizedBox(height: 16),
                 const Divider(),
@@ -283,15 +296,21 @@ class _SeccionDatosDespachoState extends ConsumerState<_SeccionDatosDespacho> {
   }
 
   Future<void> _guardar() async {
-    await ref
-        .read(datosDespachoProvider.notifier)
-        .actualizar(
-          DatosDespacho(
-            nombre: _nombreCtrl.text.trim(),
-            nifCif: _nifCtrl.text.trim(),
-            direccion: _direccionCtrl.text.trim(),
-          ),
-        );
+    try {
+      await ref
+          .read(datosDespachoProvider.notifier)
+          .actualizar(
+            DatosDespacho(
+              nombre: _nombreCtrl.text.trim(),
+              nifCif: _nifCtrl.text.trim(),
+              direccion: _direccionCtrl.text.trim(),
+            ),
+          );
+    } catch (error) {
+      // Lo escrito se queda en los campos para poder reintentar.
+      if (mounted) mostrarError(context, 'No se pudieron guardar los datos del despacho', error);
+      return;
+    }
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Datos del despacho guardados')),
