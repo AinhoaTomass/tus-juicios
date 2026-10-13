@@ -84,8 +84,12 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await supabase.auth.resetPasswordForEmail(
         email,
+        // En web se vuelve a la raíz de la app (p. ej. .../tus-juicios/ en
+        // GitHub Pages, no a la raíz del dominio). Supabase abre allí la
+        // sesión temporal y emite `passwordRecovery`, y el router lleva a la
+        // pantalla de nueva contraseña.
         redirectTo: kIsWeb
-            ? '${Uri.base.origin}/reset-password'
+            ? Uri.base.resolve('.').toString()
             : 'tusjuicios://reset-password',
       );
       if (mounted) {
