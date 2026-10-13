@@ -44,6 +44,11 @@ class _ClientesListaScreenState extends ConsumerState<ClientesListaScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.go('/clientes/nuevo'),
+        icon: const Icon(Icons.add),
+        label: const Text('Nuevo cliente'),
+      ),
       body: clientesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error al cargar clientes: $error')),
@@ -63,7 +68,8 @@ class _ClientesListaScreenState extends ConsumerState<ClientesListaScreen> {
           return RefreshIndicator(
             onRefresh: () => ref.read(clientesListaProvider.notifier).refrescar(),
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              // Hueco al final para que el botón flotante no tape la última tarjeta.
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               children: [
                 TextField(
                   controller: _busquedaCtrl,
@@ -101,11 +107,6 @@ class _ClientesListaScreenState extends ConsumerState<ClientesListaScreen> {
                       child: _ClienteCard(cliente: cliente),
                     ),
                   ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => context.go('/clientes/nuevo'),
-                  child: const Text('Nuevo cliente'),
-                ),
               ],
             ),
           );
@@ -152,7 +153,7 @@ class _ClienteCard extends StatelessWidget {
               if (cliente.nifCif != null) cliente.nifCif!,
               cliente.tipo == TipoCliente.fisica ? 'FÍSICA' : 'JURÍDICA',
             ].join(' · '),
-            style: textTheme.labelMedium?.copyWith(color: AppTheme.of(context).accent),
+            style: textTheme.labelMedium?.copyWith(color: AppTheme.of(context).accentInk),
           ),
           if (cliente.resumen != null) ...[
             const SizedBox(height: 6),

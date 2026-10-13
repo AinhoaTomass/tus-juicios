@@ -278,7 +278,7 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
             },
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
+          OutlinedButton(
             onPressed: () => context.go('/clientes'),
             child: const Text('Ver todos los clientes'),
           ),

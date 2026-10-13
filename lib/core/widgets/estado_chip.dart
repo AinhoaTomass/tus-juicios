@@ -15,7 +15,7 @@ class EstadoChip extends StatelessWidget {
   Color _color(BuildContext context) => switch (tono) {
         EstadoTono.neutro => AppTheme.of(context).ink,
         EstadoTono.exito => const Color(0xFF3F7D4F),
-        EstadoTono.aviso => AppTheme.of(context).accent,
+        EstadoTono.aviso => AppTheme.of(context).accentInk,
         EstadoTono.urgente => const Color(0xFFB33A3A),
       };
 

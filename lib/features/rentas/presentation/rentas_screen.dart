@@ -33,6 +33,11 @@ class _RentasScreenState extends ConsumerState<RentasScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Rentas')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.go('/rentas/nuevo'),
+        icon: const Icon(Icons.add),
+        label: const Text('Nueva renta'),
+      ),
       body: rentasAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error al cargar rentas: $error')),
@@ -44,7 +49,8 @@ class _RentasScreenState extends ConsumerState<RentasScreen> {
           return RefreshIndicator(
             onRefresh: () => ref.read(rentasListaProvider.notifier).refrescar(),
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              // Hueco al final para que el botón flotante no tape la última tarjeta.
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               children: [
                 StatTileGrid(
                   tiles: [
@@ -121,7 +127,7 @@ class _RentasScreenState extends ConsumerState<RentasScreen> {
                               style: Theme.of(context)
                                   .textTheme
                                   .labelMedium
-                                  ?.copyWith(color: AppTheme.of(context).accent),
+                                  ?.copyWith(color: AppTheme.of(context).accentInk),
                             ),
                             if (renta.resultado != null) ...[
                               const SizedBox(height: 6),
@@ -143,11 +149,6 @@ class _RentasScreenState extends ConsumerState<RentasScreen> {
                       ),
                     ),
                   ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () => context.go('/rentas/nuevo'),
-                  child: const Text('Nueva renta'),
-                ),
               ],
             ),
           );

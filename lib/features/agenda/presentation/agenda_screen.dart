@@ -34,9 +34,10 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Agenda')),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/agenda/nuevo'),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Nueva cita'),
       ),
       body: eventosAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -72,7 +73,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                 child: eventosSeleccionados.isEmpty
                     ? const Center(child: Text('Sin eventos este día.'))
                     : ListView.separated(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                         itemCount: eventosSeleccionados.length,
                         separatorBuilder: (context, index) => const SizedBox(height: 8),
                         itemBuilder: (context, index) {

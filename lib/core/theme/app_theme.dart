@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 class AppColors extends ThemeExtension<AppColors> {
   const AppColors({
     required this.accent,
+    required this.accentInk,
     required this.background,
     required this.surface,
     required this.ink,
@@ -17,6 +18,12 @@ class AppColors extends ThemeExtension<AppColors> {
   });
 
   final Color accent;
+
+  /// Dorado para texto y rellenos (botones principales, etiquetas): más
+  /// oscuro que [accent] en claro para llegar a contraste 4,5:1 sobre el
+  /// fondo crema. [accent] queda para detalles decorativos (bordes, iconos).
+  final Color accentInk;
+
   final Color background;
   final Color surface;
   final Color ink;
@@ -28,6 +35,7 @@ class AppColors extends ThemeExtension<AppColors> {
 
   static const light = AppColors(
     accent: Color(0xFFB68235),
+    accentInk: Color(0xFF8F6324),
     background: Color(0xFFFAF8F5),
     surface: Color(0xFFFFFFFF),
     ink: Color(0xFF2A2622),
@@ -37,6 +45,7 @@ class AppColors extends ThemeExtension<AppColors> {
 
   static const dark = AppColors(
     accent: Color(0xFFC99A4E),
+    accentInk: Color(0xFFC99A4E),
     background: Color(0xFF1C1917),
     surface: Color(0xFF262220),
     ink: Color(0xFFEDE6DC),
@@ -47,6 +56,7 @@ class AppColors extends ThemeExtension<AppColors> {
   @override
   AppColors copyWith({
     Color? accent,
+    Color? accentInk,
     Color? background,
     Color? surface,
     Color? ink,
@@ -55,6 +65,7 @@ class AppColors extends ThemeExtension<AppColors> {
   }) {
     return AppColors(
       accent: accent ?? this.accent,
+      accentInk: accentInk ?? this.accentInk,
       background: background ?? this.background,
       surface: surface ?? this.surface,
       ink: ink ?? this.ink,
@@ -68,6 +79,7 @@ class AppColors extends ThemeExtension<AppColors> {
     if (other is! AppColors) return this;
     return AppColors(
       accent: Color.lerp(accent, other.accent, t)!,
+      accentInk: Color.lerp(accentInk, other.accentInk, t)!,
       background: Color.lerp(background, other.background, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
       ink: Color.lerp(ink, other.ink, t)!,
@@ -92,6 +104,9 @@ abstract final class AppTheme {
 
   static ThemeData _build(AppColors colors) {
     final brightness = colors == AppColors.dark ? Brightness.dark : Brightness.light;
+    // Texto sobre relleno dorado: blanco en claro, tinta oscura en oscuro
+    // (el dorado del tema oscuro es demasiado claro para texto blanco).
+    final onAccent = brightness == Brightness.dark ? colors.background : Colors.white;
 
     final base = ThemeData(
       useMaterial3: true,
@@ -99,7 +114,8 @@ abstract final class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: colors.accent,
         brightness: brightness,
-        primary: colors.accent,
+        primary: colors.accentInk,
+        onPrimary: onAccent,
         surface: colors.surface,
       ),
       scaffoldBackgroundColor: colors.background,
@@ -147,6 +163,16 @@ abstract final class AppTheme {
     );
 
     final thinBorder = BorderSide(color: colors.hairline, width: 1);
+
+    final primaryButtonStyle = ElevatedButton.styleFrom(
+      backgroundColor: colors.accentInk,
+      foregroundColor: onAccent,
+      disabledBackgroundColor: colors.hairline,
+      disabledForegroundColor: colors.mutedInk,
+      elevation: 0,
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+    );
 
     return base.copyWith(
       textTheme: textTheme,
@@ -196,16 +222,19 @@ abstract final class AppTheme {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
       ),
-      // Acción principal: también con borde fino y sin relleno, coherente
-      // con el resto de la UI ("bordes finos sin relleno").
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          foregroundColor: colors.accent,
-          side: BorderSide(color: colors.accent, width: 1),
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+      // Acción principal (Guardar, Nuevo...): única pieza con relleno dorado,
+      // para que se distinga a primera vista de las secundarias (borde fino).
+      elevatedButtonTheme: ElevatedButtonThemeData(style: primaryButtonStyle),
+      filledButtonTheme: FilledButtonThemeData(style: primaryButtonStyle),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: colors.accentInk,
+        foregroundColor: onAccent,
+        elevation: 2,
+        highlightElevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+        extendedTextStyle: bodyFont.labelLarge?.copyWith(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
         ),
       ),
       dividerTheme: DividerThemeData(color: colors.hairline, thickness: 1),

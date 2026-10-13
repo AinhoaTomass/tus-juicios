@@ -43,6 +43,11 @@ class _FacturasScreenState extends ConsumerState<FacturasScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Facturas')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.go('/facturas/nuevo'),
+        icon: const Icon(Icons.add),
+        label: const Text('Nueva factura'),
+      ),
       body: facturasAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error al cargar facturas: $error')),
@@ -59,7 +64,8 @@ class _FacturasScreenState extends ConsumerState<FacturasScreen> {
           return RefreshIndicator(
             onRefresh: () => ref.read(facturasListaProvider.notifier).refrescar(),
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              // Hueco al final para que el botón flotante no tape la última tarjeta.
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               children: [
                 StatTileGrid(
                   tiles: [
@@ -156,11 +162,6 @@ class _FacturasScreenState extends ConsumerState<FacturasScreen> {
                       ),
                     ),
                   ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () => context.go('/facturas/nuevo'),
-                  child: const Text('Nueva factura'),
-                ),
               ],
             ),
           );

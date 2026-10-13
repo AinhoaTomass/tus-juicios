@@ -17,6 +17,11 @@ class NotasScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Notas')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.go('/notas/nuevo'),
+        icon: const Icon(Icons.add),
+        label: const Text('Nueva nota'),
+      ),
       body: notasAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error al cargar notas: $error')),
@@ -24,7 +29,8 @@ class NotasScreen extends ConsumerWidget {
           return RefreshIndicator(
             onRefresh: () => ref.read(notasListaProvider.notifier).refrescar(),
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              // Hueco al final para que el botón flotante no tape la última tarjeta.
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
               children: [
                 if (notas.isEmpty)
                   const Padding(
@@ -48,7 +54,7 @@ class NotasScreen extends ConsumerWidget {
                                   style: Theme.of(context)
                                       .textTheme
                                       .labelMedium
-                                      ?.copyWith(color: AppTheme.of(context).accent),
+                                      ?.copyWith(color: AppTheme.of(context).accentInk),
                                 ),
                                 if (nota.clienteNombre != null)
                                   EstadoChip(label: nota.clienteNombre!),
@@ -69,11 +75,6 @@ class NotasScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () => context.go('/notas/nuevo'),
-                  child: const Text('Nueva nota'),
-                ),
               ],
             ),
           );
