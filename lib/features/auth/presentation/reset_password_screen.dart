@@ -71,6 +71,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _passwordCtrl,
+                    autofillHints: const [AutofillHints.newPassword],
                     decoration: const InputDecoration(
                       labelText: 'Nueva contraseña',
                       helperText: ayudaContrasena,
@@ -83,6 +84,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _confirmCtrl,
+                    autofillHints: const [AutofillHints.newPassword],
                     decoration: const InputDecoration(labelText: 'Confirmar contraseña'),
                     obscureText: true,
                     validator: (value) {

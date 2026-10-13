@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -18,7 +18,12 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="TusJuicios — gestión de clientes, procedimientos, agenda y facturación del despacho.">
+  <!-- Herramienta interna del despacho: que no aparezca en buscadores. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#FAF8F5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1C1917" media="(prefers-color-scheme: dark)">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -31,16 +36,46 @@
 
   <title>TusJuicios</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Mientras carga Flutter: fondo del tema y el logo en vez de una
+       página en blanco. flutter_bootstrap.js lo quita al arrancar la app. */
+    html, body { margin: 0; height: 100%; background: #FAF8F5; }
+    #cargando {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+      font-family: Georgia, 'Times New Roman', serif; color: #74695C;
+      transition: opacity 0.3s ease;
+    }
+    #cargando svg { width: 72px; height: 75px; animation: latido 1.6s ease-in-out infinite; }
+    #cargando p { margin: 0; font-size: 15px; letter-spacing: 0.02em; }
+    @keyframes latido { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+    @media (prefers-reduced-motion: reduce) { #cargando svg { animation: none; } }
+    @media (prefers-color-scheme: dark) {
+      html, body { background: #1C1917; }
+      #cargando { color: #A89A88; }
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
-
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <div id="cargando" role="status" aria-live="polite">
+    <!-- La balanza de assets/icon/icon.svg, recortada y sin fondo. -->
+    <svg viewBox="200 180 624 650" aria-hidden="true">
+      <g fill="none" stroke="#B68235" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="512" y1="248" x2="512" y2="785" />
+        <line x1="290" y1="335" x2="734" y2="335" />
+        <line x1="410" y1="795" x2="614" y2="795" />
+        <line x1="290" y1="335" x2="238" y2="468" />
+        <line x1="290" y1="335" x2="342" y2="468" />
+        <line x1="734" y1="335" x2="682" y2="468" />
+        <line x1="734" y1="335" x2="786" y2="468" />
+      </g>
+      <circle cx="512" cy="220" r="28" fill="#B68235" />
+      <path d="M238,468 A52,26 0 0 0 342,468 Z" fill="#B68235" />
+      <path d="M682,468 A52,26 0 0 0 786,468 Z" fill="#B68235" />
+    </svg>
+    <p>Cargando TusJuicios…</p>
+  </div>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

@@ -194,6 +194,10 @@ abstract final class AppTheme {
       disabledBackgroundColor: colors.hairline,
       disabledForegroundColor: colors.mutedInk,
       elevation: 0,
+      // Altura fija: en web/escritorio Flutter compacta los botones y el
+      // principal quedaba como una línea fina.
+      minimumSize: const Size(64, 48),
+      visualDensity: VisualDensity.standard,
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
     );

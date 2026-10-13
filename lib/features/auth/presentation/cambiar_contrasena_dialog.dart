@@ -76,6 +76,7 @@ class _CambiarContrasenaDialogState extends State<CambiarContrasenaDialog> {
             children: [
               TextFormField(
                 controller: _actualCtrl,
+                autofillHints: const [AutofillHints.password],
                 decoration: const InputDecoration(
                   labelText: 'Contraseña actual',
                 ),
@@ -87,6 +88,7 @@ class _CambiarContrasenaDialogState extends State<CambiarContrasenaDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _nuevaCtrl,
+                autofillHints: const [AutofillHints.newPassword],
                 decoration: const InputDecoration(
                   labelText: 'Nueva contraseña',
                   helperText: ayudaContrasena,
@@ -106,6 +108,7 @@ class _CambiarContrasenaDialogState extends State<CambiarContrasenaDialog> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _confirmCtrl,
+                autofillHints: const [AutofillHints.newPassword],
                 decoration: const InputDecoration(
                   labelText: 'Confirmar nueva contraseña',
                 ),

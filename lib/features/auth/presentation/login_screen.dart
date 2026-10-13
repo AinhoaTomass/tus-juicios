@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/auth/inactividad.dart';
 import '../../../core/network/supabase_client.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/logo_balanza.dart';
 
 const _claveUltimoEmail = 'ultimo_email';
 
@@ -64,6 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
         email: email,
         password: _passwordCtrl.text,
       );
+      // Avisa al navegador/gestor de contraseñas de que el inicio de sesión
+      // ha ido bien, para que ofrezca guardar la contraseña.
+      TextInput.finishAutofillContext();
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_claveUltimoEmail, email);
     } on AuthException catch (e) {
@@ -118,67 +124,95 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 360),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'TusJuicios',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  if (_aviso != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      _aviso!,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  TextFormField(
-                    controller: _emailCtrl,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? 'Obligatorio' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordCtrl,
-                    focusNode: _passwordFocus,
-                    decoration: const InputDecoration(labelText: 'Contraseña'),
-                    obscureText: true,
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? 'Obligatorio' : null,
-                    onFieldSubmitted: (_) => _iniciarSesion(),
-                  ),
-                  if (_error != null) ...[
+            // AutofillGroup + autofillHints: el navegador o el gestor de
+            // contraseñas del móvil reconocen los campos y ofrecen guardar y
+            // rellenar la contraseña.
+            child: AutofillGroup(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Center(child: LogoBalanza(alto: 72)),
                     const SizedBox(height: 16),
                     Text(
-                      _error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+                      'TusJuicios',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Gestión del despacho',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.of(context).mutedInk,
                       ),
                     ),
+                    if (_aviso != null) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        _aviso!,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                    const SizedBox(height: 32),
+                    TextFormField(
+                      controller: _emailCtrl,
+                      decoration: const InputDecoration(labelText: 'Email'),
+                      keyboardType: TextInputType.emailAddress,
+                      autofillHints: const [
+                        AutofillHints.email,
+                        AutofillHints.username,
+                      ],
+                      textInputAction: TextInputAction.next,
+                      validator: (value) => (value == null || value.isEmpty)
+                          ? 'Obligatorio'
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _passwordCtrl,
+                      focusNode: _passwordFocus,
+                      decoration: const InputDecoration(
+                        labelText: 'Contraseña',
+                      ),
+                      autofillHints: const [AutofillHints.password],
+                      textInputAction: TextInputAction.go,
+                      obscureText: true,
+                      validator: (value) => (value == null || value.isEmpty)
+                          ? 'Obligatorio'
+                          : null,
+                      onFieldSubmitted: (_) => _iniciarSesion(),
+                    ),
+                    if (_error != null) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        _error!,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    FilledButton(
+                      onPressed: _cargando ? null : _iniciarSesion,
+                      child: _cargando
+                          ? const SizedBox(
+                              height: 18,
+                              width: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Entrar'),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: _cargando ? null : _recuperarContrasena,
+                      child: const Text('¿Olvidaste tu contraseña?'),
+                    ),
                   ],
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: _cargando ? null : _iniciarSesion,
-                    child: _cargando
-                        ? const SizedBox(
-                            height: 18,
-                            width: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Entrar'),
-                  ),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: _cargando ? null : _recuperarContrasena,
-                    child: const Text('¿Olvidaste tu contraseña?'),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
