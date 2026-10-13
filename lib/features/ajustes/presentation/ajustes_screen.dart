@@ -33,6 +33,7 @@ class AjustesScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Ajustes')),
       body: ResponsiveContent(
+        maxWidth: anchoFormulario,
         child: configAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) =>

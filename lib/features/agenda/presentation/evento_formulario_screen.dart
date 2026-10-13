@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
 import '../../../core/widgets/mostrar_error.dart';
+import '../../../core/widgets/responsive_content.dart';
 import '../../clientes/domain/cliente.dart';
 import '../../clientes/presentation/clientes_providers.dart';
 import '../domain/evento.dart';
@@ -179,125 +180,128 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
       },
       child: Scaffold(
         appBar: AppBar(title: Text(esEdicion ? 'Editar cita' : 'Nueva cita')),
-        body: Form(
-          key: _formKey,
-          onChanged: _marcarSucio,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              SegmentedButton<CategoriaEvento>(
-                showSelectedIcon: false,
-                segments: const [
-                  ButtonSegment(value: CategoriaEvento.despacho, label: Text('Despacho')),
-                  ButtonSegment(value: CategoriaEvento.personal, label: Text('Personal')),
-                ],
-                selected: {_categoria},
-                onSelectionChanged: (seleccion) {
-                  setState(() {
-                    _categoria = seleccion.first;
-                    if (_categoria == CategoriaEvento.personal) _clienteError = null;
-                  });
-                  _marcarSucio();
-                },
-              ),
-              const SizedBox(height: 16),
-              if (_categoria == CategoriaEvento.despacho) ...[
-                // Etiquetas cortas con el contexto encima: "Cliente existente"
-                // y "Cliente nuevo" se partían en dos líneas en el móvil.
-                Text('¿Con quién es la cita?', style: Theme.of(context).textTheme.bodySmall),
-                const SizedBox(height: 6),
-                SegmentedButton<_ContactoTipo>(
+        body: ResponsiveContent(
+          maxWidth: anchoFormulario,
+          child: Form(
+            key: _formKey,
+            onChanged: _marcarSucio,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                SegmentedButton<CategoriaEvento>(
                   showSelectedIcon: false,
                   segments: const [
-                    ButtonSegment(value: _ContactoTipo.existente, label: Text('Cliente')),
-                    ButtonSegment(value: _ContactoTipo.nuevo, label: Text('Nuevo')),
-                    ButtonSegment(value: _ContactoTipo.otro, label: Text('Otro')),
+                    ButtonSegment(value: CategoriaEvento.despacho, label: Text('Despacho')),
+                    ButtonSegment(value: CategoriaEvento.personal, label: Text('Personal')),
                   ],
-                  selected: {_contactoTipo},
+                  selected: {_categoria},
                   onSelectionChanged: (seleccion) {
                     setState(() {
-                      _contactoTipo = seleccion.first;
-                      _clienteError = null;
+                      _categoria = seleccion.first;
+                      if (_categoria == CategoriaEvento.personal) _clienteError = null;
                     });
                     _marcarSucio();
                   },
                 ),
                 const SizedBox(height: 16),
-                if (_contactoTipo == _ContactoTipo.existente)
-                  clientesAsync.when(
-                    loading: () => const LinearProgressIndicator(),
-                    error: (error, _) => Text('Error al cargar clientes: $error'),
-                    data: (clientes) => DropdownMenu<String>(
-                      expandedInsets: EdgeInsets.zero,
-                      initialSelection: _clienteId,
-                      label: const Text('Cliente'),
-                      errorText: _clienteError,
-                      dropdownMenuEntries: clientes
-                          .map((c) => DropdownMenuEntry(value: c.id, label: c.nombre))
-                          .toList(),
-                      onSelected: (value) {
-                        setState(() {
-                          _clienteId = value;
-                          _clienteError = null;
-                        });
-                        _marcarSucio();
-                      },
+                if (_categoria == CategoriaEvento.despacho) ...[
+                  // Etiquetas cortas con el contexto encima: "Cliente existente"
+                  // y "Cliente nuevo" se partían en dos líneas en el móvil.
+                  Text('¿Con quién es la cita?', style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(height: 6),
+                  SegmentedButton<_ContactoTipo>(
+                    showSelectedIcon: false,
+                    segments: const [
+                      ButtonSegment(value: _ContactoTipo.existente, label: Text('Cliente')),
+                      ButtonSegment(value: _ContactoTipo.nuevo, label: Text('Nuevo')),
+                      ButtonSegment(value: _ContactoTipo.otro, label: Text('Otro')),
+                    ],
+                    selected: {_contactoTipo},
+                    onSelectionChanged: (seleccion) {
+                      setState(() {
+                        _contactoTipo = seleccion.first;
+                        _clienteError = null;
+                      });
+                      _marcarSucio();
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  if (_contactoTipo == _ContactoTipo.existente)
+                    clientesAsync.when(
+                      loading: () => const LinearProgressIndicator(),
+                      error: (error, _) => Text('Error al cargar clientes: $error'),
+                      data: (clientes) => DropdownMenu<String>(
+                        expandedInsets: EdgeInsets.zero,
+                        initialSelection: _clienteId,
+                        label: const Text('Cliente'),
+                        errorText: _clienteError,
+                        dropdownMenuEntries: clientes
+                            .map((c) => DropdownMenuEntry(value: c.id, label: c.nombre))
+                            .toList(),
+                        onSelected: (value) {
+                          setState(() {
+                            _clienteId = value;
+                            _clienteError = null;
+                          });
+                          _marcarSucio();
+                        },
+                      ),
+                    )
+                  else if (_contactoTipo == _ContactoTipo.nuevo)
+                    TextFormField(
+                      controller: _clienteNuevoCtrl,
+                      decoration: const InputDecoration(labelText: 'Nombre del cliente nuevo'),
+                      validator: (value) =>
+                          (value == null || value.trim().isEmpty) ? 'Obligatorio' : null,
                     ),
-                  )
-                else if (_contactoTipo == _ContactoTipo.nuevo)
-                  TextFormField(
-                    controller: _clienteNuevoCtrl,
-                    decoration: const InputDecoration(labelText: 'Nombre del cliente nuevo'),
-                    validator: (value) =>
-                        (value == null || value.trim().isEmpty) ? 'Obligatorio' : null,
-                  ),
-                const SizedBox(height: 16),
-              ],
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Fecha'),
-                subtitle: Text('${_fecha.day}/${_fecha.month}/${_fecha.year}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.calendar_today_outlined),
-                  onPressed: _seleccionarFecha,
-                ),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Hora'),
-                subtitle: Text(_hora == null ? 'Sin hora' : _hora!.format(context)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.access_time_outlined),
-                  onPressed: _seleccionarHora,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descripcionCtrl,
-                decoration: const InputDecoration(
-                  labelText: '¿De qué se trata?',
-                  hintText: 'p.ej. Juicio, SMAC, ir al médico…',
-                ),
-                maxLines: 3,
-                validator: (value) =>
-                    (value == null || value.trim().isEmpty) ? 'Obligatorio' : null,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => context.pop(),
-                      child: const Text('Cancelar'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
-                  ),
+                  const SizedBox(height: 16),
                 ],
-              ),
-            ],
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Fecha'),
+                  subtitle: Text('${_fecha.day}/${_fecha.month}/${_fecha.year}'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.calendar_today_outlined),
+                    onPressed: _seleccionarFecha,
+                  ),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Hora'),
+                  subtitle: Text(_hora == null ? 'Sin hora' : _hora!.format(context)),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.access_time_outlined),
+                    onPressed: _seleccionarHora,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _descripcionCtrl,
+                  decoration: const InputDecoration(
+                    labelText: '¿De qué se trata?',
+                    hintText: 'p.ej. Juicio, SMAC, ir al médico…',
+                  ),
+                  maxLines: 3,
+                  validator: (value) =>
+                      (value == null || value.trim().isEmpty) ? 'Obligatorio' : null,
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => context.pop(),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

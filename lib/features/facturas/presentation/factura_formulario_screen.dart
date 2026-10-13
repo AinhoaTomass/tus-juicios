@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
 import '../../../core/widgets/mostrar_error.dart';
+import '../../../core/widgets/responsive_content.dart';
 import '../../clientes/presentation/clientes_providers.dart';
 import '../domain/factura.dart';
 import 'facturas_providers.dart';
@@ -143,98 +144,101 @@ class _FacturaFormularioScreenState extends ConsumerState<FacturaFormularioScree
       },
       child: Scaffold(
         appBar: AppBar(title: Text(esEdicion ? 'Editar factura' : 'Nueva factura')),
-        body: Form(
-          key: _formKey,
-          onChanged: _marcarSucio,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Número'),
-                subtitle: Text(
-                  esEdicion ? _numeroCtrl.text : 'Se asignará automáticamente al guardar',
+        body: ResponsiveContent(
+          maxWidth: anchoFormulario,
+          child: Form(
+            key: _formKey,
+            onChanged: _marcarSucio,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Número'),
+                  subtitle: Text(
+                    esEdicion ? _numeroCtrl.text : 'Se asignará automáticamente al guardar',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              clientesAsync.when(
-                loading: () => const LinearProgressIndicator(),
-                error: (error, _) => Text('Error al cargar clientes: $error'),
-                data: (clientes) => DropdownMenu<String>(
-                  expandedInsets: EdgeInsets.zero,
-                  initialSelection: _clienteId,
-                  label: const Text('Cliente'),
-                  errorText: _clienteError,
-                  dropdownMenuEntries: clientes
-                      .map((c) => DropdownMenuEntry(value: c.id, label: c.nombre))
-                      .toList(),
-                  onSelected: (value) {
-                    setState(() {
-                      _clienteId = value;
-                      _clienteError = null;
-                    });
+                const SizedBox(height: 16),
+                clientesAsync.when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (error, _) => Text('Error al cargar clientes: $error'),
+                  data: (clientes) => DropdownMenu<String>(
+                    expandedInsets: EdgeInsets.zero,
+                    initialSelection: _clienteId,
+                    label: const Text('Cliente'),
+                    errorText: _clienteError,
+                    dropdownMenuEntries: clientes
+                        .map((c) => DropdownMenuEntry(value: c.id, label: c.nombre))
+                        .toList(),
+                    onSelected: (value) {
+                      setState(() {
+                        _clienteId = value;
+                        _clienteError = null;
+                      });
+                      _marcarSucio();
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _importeCtrl,
+                  decoration: const InputDecoration(labelText: 'Importe (€)'),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Obligatorio';
+                    return double.tryParse(value.replaceAll(',', '.')) == null
+                        ? 'Debe ser un número'
+                        : null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _conceptoCtrl,
+                  decoration: const InputDecoration(labelText: 'Concepto'),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                SegmentedButton<EstadoFactura>(
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(value: EstadoFactura.pendiente, label: Text('Pendiente')),
+                    ButtonSegment(value: EstadoFactura.pagada, label: Text('Pagada')),
+                    ButtonSegment(value: EstadoFactura.vencida, label: Text('Vencida')),
+                  ],
+                  selected: {_estado},
+                  onSelectionChanged: (seleccion) {
+                    setState(() => _estado = seleccion.first);
                     _marcarSucio();
                   },
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _importeCtrl,
-                decoration: const InputDecoration(labelText: 'Importe (€)'),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Obligatorio';
-                  return double.tryParse(value.replaceAll(',', '.')) == null
-                      ? 'Debe ser un número'
-                      : null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _conceptoCtrl,
-                decoration: const InputDecoration(labelText: 'Concepto'),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 16),
-              SegmentedButton<EstadoFactura>(
-                showSelectedIcon: false,
-                segments: const [
-                  ButtonSegment(value: EstadoFactura.pendiente, label: Text('Pendiente')),
-                  ButtonSegment(value: EstadoFactura.pagada, label: Text('Pagada')),
-                  ButtonSegment(value: EstadoFactura.vencida, label: Text('Vencida')),
-                ],
-                selected: {_estado},
-                onSelectionChanged: (seleccion) {
-                  setState(() => _estado = seleccion.first);
-                  _marcarSucio();
-                },
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Fecha'),
-                subtitle: Text('${_fecha.day}/${_fecha.month}/${_fecha.year}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.calendar_today_outlined),
-                  onPressed: _seleccionarFecha,
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Fecha'),
+                  subtitle: Text('${_fecha.day}/${_fecha.month}/${_fecha.year}'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.calendar_today_outlined),
+                    onPressed: _seleccionarFecha,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => context.pop(),
-                      child: const Text('Cancelar'),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => context.pop(),
+                        child: const Text('Cancelar'),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -6,6 +6,14 @@ import 'package:flutter/material.dart';
 /// duplicarlas.
 const anchoPanelLateral = 700.0;
 
+/// Ancho máximo de listados, Inicio y pantallas de consulta en pantallas
+/// anchas: más allá, buscadores y tarjetas se estiran de borde a borde.
+const anchoListado = 960.0;
+
+/// Ancho máximo de los formularios: campos de un monitor entero de ancho
+/// son incómodos de leer y rellenar.
+const anchoFormulario = 640.0;
+
 /// Centra el contenido y le pone un ancho máximo en pantallas anchas
 /// (tablet/escritorio en la versión web), para que no se estire de borde a
 /// borde en un monitor. En móvil no cambia nada: [maxWidth] no llega a
@@ -14,7 +22,7 @@ class ResponsiveContent extends StatelessWidget {
   const ResponsiveContent({
     super.key,
     required this.child,
-    this.maxWidth = 1400,
+    this.maxWidth = anchoListado,
   });
 
   final Widget child;

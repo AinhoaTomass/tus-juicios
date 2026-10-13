@@ -9,11 +9,13 @@ import '../../features/clientes/presentation/procedimientos_providers.dart';
 import '../network/supabase_client.dart';
 import '../notificaciones/notificaciones_service.dart';
 import '../state/formulario_sucio_provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/confirmar_salida_dialog.dart';
 import '../widgets/responsive_content.dart';
 
 /// Shell con 5 secciones (Notas queda fuera para no saturar la barra
-/// inferior; se abre desde Inicio o el panel lateral, y desde la ficha de
+/// inferior; en el móvil se abre desde Inicio, en el panel lateral es una
+/// entrada más, y está también en la ficha de
 /// cada cliente). En móvil se muestra como barra
 /// de navegación inferior; en pantallas anchas (tablet/escritorio) pasa a un
 /// panel lateral (que se puede esconder) y el contenido se centra con un
@@ -78,6 +80,7 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     final ancho = MediaQuery.sizeOf(context).width;
     final esPanelLateral = ancho >= anchoPanelLateral;
+    final extendido = ancho >= 1000;
 
     final contenido = ResponsiveContent(child: widget.shell);
 
@@ -104,10 +107,15 @@ class _AppShellState extends ConsumerState<AppShell> {
         children: [
           if (_menuVisible)
             NavigationRail(
-              extended: ancho >= 1000,
+              extended: extendido,
               selectedIndex: widget.shell.currentIndex,
-              onDestinationSelected: (index) => _cambiarPestana(context, index),
-              labelType: ancho >= 1000
+              // Notas va después de las 5 secciones: no es una pestaña del
+              // shell (en el móvil no cabe en la barra inferior), así que se
+              // abre encima en vez de cambiar de rama.
+              onDestinationSelected: (index) => index == _destinos.length
+                  ? context.push('/notas')
+                  : _cambiarPestana(context, index),
+              labelType: extendido
                   ? NavigationRailLabelType.none
                   : NavigationRailLabelType.all,
               trailingAtBottom: true,
@@ -115,27 +123,26 @@ class _AppShellState extends ConsumerState<AppShell> {
                 top: false,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Wrap(
-                    alignment: WrapAlignment.center,
+                  child: Column(
+                    crossAxisAlignment:
+                        extendido ? CrossAxisAlignment.start : CrossAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.sticky_note_2_outlined),
-                        tooltip: 'Notas',
-                        onPressed: () => context.push('/notas'),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.settings_outlined),
-                        tooltip: 'Ajustes',
+                      _AccionLateral(
+                        icono: Icons.settings_outlined,
+                        texto: 'Ajustes',
+                        conTexto: extendido,
                         onPressed: () => context.push('/ajustes'),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.logout),
-                        tooltip: 'Cerrar sesión',
+                      _AccionLateral(
+                        icono: Icons.logout,
+                        texto: 'Cerrar sesión',
+                        conTexto: extendido,
                         onPressed: () => supabase.auth.signOut(),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.menu_open),
-                        tooltip: 'Ocultar menú',
+                      _AccionLateral(
+                        icono: Icons.menu_open,
+                        texto: 'Ocultar menú',
+                        conTexto: extendido,
                         onPressed: () => setState(() => _menuVisible = false),
                       ),
                     ],
@@ -149,6 +156,11 @@ class _AppShellState extends ConsumerState<AppShell> {
                     selectedIcon: Icon(destino.iconSeleccionado),
                     label: Text(destino.label),
                   ),
+                const NavigationRailDestination(
+                  icon: Icon(Icons.sticky_note_2_outlined),
+                  selectedIcon: Icon(Icons.sticky_note_2),
+                  label: Text('Notas'),
+                ),
               ],
             )
           else
@@ -165,6 +177,41 @@ class _AppShellState extends ConsumerState<AppShell> {
           if (_menuVisible) const VerticalDivider(width: 1),
           Expanded(child: contenido),
         ],
+      ),
+    );
+  }
+}
+
+/// Acción secundaria al pie del panel lateral: con su nombre al lado cuando
+/// el panel está extendido, o solo el icono (con tooltip) cuando es estrecho.
+class _AccionLateral extends StatelessWidget {
+  const _AccionLateral({
+    required this.icono,
+    required this.texto,
+    required this.conTexto,
+    required this.onPressed,
+  });
+
+  final IconData icono;
+  final String texto;
+  final bool conTexto;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!conTexto) {
+      return IconButton(icon: Icon(icono), tooltip: texto, onPressed: onPressed);
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: TextButton.icon(
+        onPressed: onPressed,
+        icon: Icon(icono, size: 20),
+        label: Text(texto),
+        style: TextButton.styleFrom(
+          foregroundColor: AppTheme.of(context).mutedInk,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        ),
       ),
     );
   }

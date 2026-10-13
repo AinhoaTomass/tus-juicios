@@ -272,9 +272,13 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
             },
           ),
           const SizedBox(height: 16),
-          OutlinedButton(
-            onPressed: () => context.go('/clientes'),
-            child: const Text('Ver todos los clientes'),
+          // Centrado y a su tamaño: estirado al ancho de la lista parecía
+          // una barra en el ordenador.
+          Center(
+            child: OutlinedButton(
+              onPressed: () => context.go('/clientes'),
+              child: const Text('Ver todos los clientes'),
+            ),
           ),
         ],
       ),

@@ -66,6 +66,13 @@ class StatTileGrid extends StatelessWidget {
         var columnas =
             (constraints.maxWidth / (_anchoMaximo + _espacio)).floor().clamp(1, tiles.length);
         if (columnas < 2 && tiles.length >= 2) columnas = 2;
+        // Filas completas: con 4 tarjetas y sitio para 3, mejor 2 + 2 que
+        // 3 + 1 con una descolgada.
+        var completas = columnas;
+        while (completas > 2 && tiles.length % completas != 0) {
+          completas--;
+        }
+        if (tiles.length % completas == 0) columnas = completas;
         final anchoTarjeta = (constraints.maxWidth - _espacio * (columnas - 1)) / columnas;
         return Wrap(
           spacing: _espacio,

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
 import '../../../core/widgets/mostrar_error.dart';
+import '../../../core/widgets/responsive_content.dart';
 import '../domain/cliente.dart';
 import 'clientes_providers.dart';
 
@@ -135,85 +136,88 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
       },
       child: Scaffold(
       appBar: AppBar(title: Text(esEdicion ? 'Editar cliente' : 'Nuevo cliente')),
-      body: Form(
-        key: _formKey,
-        onChanged: _marcarSucio,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _nombreCtrl,
-              decoration: const InputDecoration(labelText: 'Nombre'),
-              validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _nifCtrl,
-              decoration: const InputDecoration(labelText: 'NIF / CIF'),
-            ),
-            const SizedBox(height: 16),
-            SegmentedButton<TipoCliente>(
-              showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(value: TipoCliente.fisica, label: Text('Física')),
-                ButtonSegment(value: TipoCliente.juridica, label: Text('Jurídica')),
-              ],
-              selected: {_tipo},
-              onSelectionChanged: (seleccion) {
-                setState(() => _tipo = seleccion.first);
-                _marcarSucio();
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _telefonoCtrl,
-              decoration: const InputDecoration(labelText: 'Teléfono'),
-              keyboardType: TextInputType.phone,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _emailCtrl,
-              decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _direccionCtrl,
-              decoration: const InputDecoration(labelText: 'Dirección'),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _resumenCtrl,
-              decoration: const InputDecoration(labelText: 'Resumen'),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _notasCtrl,
-              decoration: const InputDecoration(labelText: 'Notas'),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => context.pop(),
-                    child: const Text('Cancelar'),
+      body: ResponsiveContent(
+        maxWidth: anchoFormulario,
+        child: Form(
+          key: _formKey,
+          onChanged: _marcarSucio,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextFormField(
+                controller: _nombreCtrl,
+                decoration: const InputDecoration(labelText: 'Nombre'),
+                validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _nifCtrl,
+                decoration: const InputDecoration(labelText: 'NIF / CIF'),
+              ),
+              const SizedBox(height: 16),
+              SegmentedButton<TipoCliente>(
+                showSelectedIcon: false,
+                segments: const [
+                  ButtonSegment(value: TipoCliente.fisica, label: Text('Física')),
+                  ButtonSegment(value: TipoCliente.juridica, label: Text('Jurídica')),
+                ],
+                selected: {_tipo},
+                onSelectionChanged: (seleccion) {
+                  setState(() => _tipo = seleccion.first);
+                  _marcarSucio();
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _telefonoCtrl,
+                decoration: const InputDecoration(labelText: 'Teléfono'),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _emailCtrl,
+                decoration: const InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _direccionCtrl,
+                decoration: const InputDecoration(labelText: 'Dirección'),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _resumenCtrl,
+                decoration: const InputDecoration(labelText: 'Resumen'),
+                maxLines: 2,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _notasCtrl,
+                decoration: const InputDecoration(labelText: 'Notas'),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => context.pop(),
+                      child: const Text('Cancelar'),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _guardar,
-                    child: const Text('Guardar cliente'),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _guardar,
+                      child: const Text('Guardar cliente'),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        ),
+                ],
+              ),
+            ],
+          ),
+          ),
+      ),
       ),
     );
   }

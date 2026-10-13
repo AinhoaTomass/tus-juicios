@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
 import '../../../core/widgets/mostrar_error.dart';
+import '../../../core/widgets/responsive_content.dart';
 import '../domain/cliente.dart';
 import 'documentos_providers.dart';
 import 'procedimientos_providers.dart';
@@ -140,100 +141,103 @@ class _ProcedimientoFormularioScreenState extends ConsumerState<ProcedimientoFor
       },
       child: Scaffold(
         appBar: AppBar(title: Text(esEdicion ? 'Editar procedimiento' : 'Nuevo procedimiento')),
-        body: Form(
-          key: _formKey,
-          onChanged: _marcarSucio,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              TextFormField(
-                controller: _nombreCtrl,
-                decoration: const InputDecoration(labelText: 'Nombre'),
-                validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
-              ),
-              const SizedBox(height: 16),
-              SegmentedButton<EstadoProcedimiento>(
-                showSelectedIcon: false,
-                segments: const [
-                  ButtonSegment(value: EstadoProcedimiento.activo, label: Text('Activo')),
-                  ButtonSegment(value: EstadoProcedimiento.pendiente, label: Text('Pendiente')),
-                  ButtonSegment(value: EstadoProcedimiento.cerrado, label: Text('Cerrado')),
-                ],
-                selected: {_estado},
-                onSelectionChanged: (seleccion) {
-                  setState(() => _estado = seleccion.first);
-                  _marcarSucio();
-                },
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Fecha meta'),
-                subtitle: Text(
-                  _fechaMeta == null
-                      ? 'Sin fecha'
-                      : '${_fechaMeta!.day}/${_fechaMeta!.month}/${_fechaMeta!.year}',
+        body: ResponsiveContent(
+          maxWidth: anchoFormulario,
+          child: Form(
+            key: _formKey,
+            onChanged: _marcarSucio,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                TextFormField(
+                  controller: _nombreCtrl,
+                  decoration: const InputDecoration(labelText: 'Nombre'),
+                  validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
                 ),
-                trailing: Wrap(
-                  spacing: 4,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.calendar_today_outlined),
-                      onPressed: _seleccionarFechaMeta,
-                    ),
-                    if (_fechaMeta != null)
-                      IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          setState(() => _fechaMeta = null);
-                          _marcarSucio();
-                        },
-                      ),
-                  ],
-                ),
-              ),
-              if (esEdicion) ...[
-                const SizedBox(height: 24),
-                const Divider(),
                 const SizedBox(height: 16),
-                Consumer(
-                  builder: (context, ref, _) {
-                    final documentosAsync = ref.watch(
-                      documentosDeProcedimientoProvider(widget.procedimientoId!),
-                    );
-                    return documentosAsync.when(
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (error, _) => Text('Error al cargar documentos: $error'),
-                      data: (documentos) => SeccionDocumentos(
-                        documentos: documentos,
-                        clienteId: widget.clienteId,
-                        procedimientoId: widget.procedimientoId,
-                        estiloLinea: true,
-                        onCambio: (_) {
-                          ref.invalidate(documentosDeProcedimientoProvider(widget.procedimientoId!));
-                          ref.invalidate(documentosDeClienteProvider(widget.clienteId));
-                        },
-                      ),
-                    );
+                SegmentedButton<EstadoProcedimiento>(
+                  showSelectedIcon: false,
+                  segments: const [
+                    ButtonSegment(value: EstadoProcedimiento.activo, label: Text('Activo')),
+                    ButtonSegment(value: EstadoProcedimiento.pendiente, label: Text('Pendiente')),
+                    ButtonSegment(value: EstadoProcedimiento.cerrado, label: Text('Cerrado')),
+                  ],
+                  selected: {_estado},
+                  onSelectionChanged: (seleccion) {
+                    setState(() => _estado = seleccion.first);
+                    _marcarSucio();
                   },
                 ),
-              ],
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => context.pop(),
-                      child: const Text('Cancelar'),
-                    ),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Fecha meta'),
+                  subtitle: Text(
+                    _fechaMeta == null
+                        ? 'Sin fecha'
+                        : '${_fechaMeta!.day}/${_fechaMeta!.month}/${_fechaMeta!.year}',
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
+                  trailing: Wrap(
+                    spacing: 4,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.calendar_today_outlined),
+                        onPressed: _seleccionarFechaMeta,
+                      ),
+                      if (_fechaMeta != null)
+                        IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() => _fechaMeta = null);
+                            _marcarSucio();
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+                if (esEdicion) ...[
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final documentosAsync = ref.watch(
+                        documentosDeProcedimientoProvider(widget.procedimientoId!),
+                      );
+                      return documentosAsync.when(
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (error, _) => Text('Error al cargar documentos: $error'),
+                        data: (documentos) => SeccionDocumentos(
+                          documentos: documentos,
+                          clienteId: widget.clienteId,
+                          procedimientoId: widget.procedimientoId,
+                          estiloLinea: true,
+                          onCambio: (_) {
+                            ref.invalidate(documentosDeProcedimientoProvider(widget.procedimientoId!));
+                            ref.invalidate(documentosDeClienteProvider(widget.clienteId));
+                          },
+                        ),
+                      );
+                    },
                   ),
                 ],
-              ),
-            ],
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => context.pop(),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

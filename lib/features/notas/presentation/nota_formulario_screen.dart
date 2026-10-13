@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
 import '../../../core/widgets/mostrar_error.dart';
+import '../../../core/widgets/responsive_content.dart';
 import '../domain/nota.dart';
 import 'notas_providers.dart';
 
@@ -188,49 +189,52 @@ class _NotaFormularioScreenState extends ConsumerState<NotaFormularioScreen> {
               ),
           ],
         ),
-        body: Form(
-          key: _formKey,
-          onChanged: _marcarSucio,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              TextFormField(
-                controller: _tituloCtrl,
-                decoration: const InputDecoration(labelText: 'Título'),
-                validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _contenidoCtrl,
-                decoration: const InputDecoration(labelText: 'Contenido'),
-                maxLines: 6,
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Fecha'),
-                subtitle: Text('${_fecha.day}/${_fecha.month}/${_fecha.year}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.calendar_today_outlined),
-                  onPressed: _seleccionarFecha,
+        body: ResponsiveContent(
+          maxWidth: anchoFormulario,
+          child: Form(
+            key: _formKey,
+            onChanged: _marcarSucio,
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                TextFormField(
+                  controller: _tituloCtrl,
+                  decoration: const InputDecoration(labelText: 'Título'),
+                  validator: (value) => (value == null || value.isEmpty) ? 'Obligatorio' : null,
                 ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => context.pop(),
-                      child: const Text('Cancelar'),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _contenidoCtrl,
+                  decoration: const InputDecoration(labelText: 'Contenido'),
+                  maxLines: 6,
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Fecha'),
+                  subtitle: Text('${_fecha.day}/${_fecha.month}/${_fecha.year}'),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.calendar_today_outlined),
+                    onPressed: _seleccionarFecha,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => context.pop(),
+                        child: const Text('Cancelar'),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
-                  ),
-                ],
-              ),
-            ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(onPressed: _guardar, child: const Text('Guardar')),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
