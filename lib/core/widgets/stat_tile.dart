@@ -29,11 +29,16 @@ class StatTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
-          Text(
-            etiqueta,
-            style: Theme.of(context).textTheme.bodySmall,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          // Si la etiqueta no cabe se reduce un poco en vez de cortarse
+          // ("Procedimientos act…" en móviles estrechos).
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              etiqueta,
+              style: Theme.of(context).textTheme.bodySmall,
+              maxLines: 1,
+            ),
           ),
         ],
       ),

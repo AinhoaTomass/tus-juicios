@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Barra horizontal de chips de filtro de selección única.
+/// Chips de filtro de selección única. Pasan a la línea siguiente cuando no
+/// caben: con un desplazamiento horizontal, en el ordenador el último chip
+/// quedaba cortado y no se podía arrastrar con el ratón.
 class FiltroChips<T> extends StatelessWidget {
   const FiltroChips({super.key, required this.opciones, required this.seleccion, required this.onChanged});
 
@@ -10,21 +12,17 @@ class FiltroChips<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (final opcion in opciones)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: ChoiceChip(
-                label: Text(opcion.$2),
-                selected: seleccion == opcion.$1,
-                onSelected: (_) => onChanged(opcion.$1),
-              ),
-            ),
-        ],
-      ),
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final opcion in opciones)
+          ChoiceChip(
+            label: Text(opcion.$2),
+            selected: seleccion == opcion.$1,
+            onSelected: (_) => onChanged(opcion.$1),
+          ),
+      ],
     );
   }
 }

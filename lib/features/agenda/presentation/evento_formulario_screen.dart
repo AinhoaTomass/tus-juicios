@@ -130,7 +130,7 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
         await repo.actualizarEvento(evento);
       }
     } catch (error) {
-      if (mounted) mostrarError(context, 'No se pudo guardar el evento', error);
+      if (mounted) mostrarError(context, 'No se pudo guardar la cita', error);
       return;
     }
 
@@ -138,7 +138,7 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
     ref.read(formularioSucioProvider.notifier).limpiar();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Evento guardado')),
+        const SnackBar(content: Text('Cita guardada')),
       );
       context.pop();
     }
@@ -178,7 +178,7 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(esEdicion ? 'Editar evento' : 'Nuevo evento')),
+        appBar: AppBar(title: Text(esEdicion ? 'Editar cita' : 'Nueva cita')),
         body: Form(
           key: _formKey,
           onChanged: _marcarSucio,
@@ -202,11 +202,15 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
               ),
               const SizedBox(height: 16),
               if (_categoria == CategoriaEvento.despacho) ...[
+                // Etiquetas cortas con el contexto encima: "Cliente existente"
+                // y "Cliente nuevo" se partían en dos líneas en el móvil.
+                Text('¿Con quién es la cita?', style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 6),
                 SegmentedButton<_ContactoTipo>(
                   showSelectedIcon: false,
                   segments: const [
-                    ButtonSegment(value: _ContactoTipo.existente, label: Text('Cliente existente')),
-                    ButtonSegment(value: _ContactoTipo.nuevo, label: Text('Cliente nuevo')),
+                    ButtonSegment(value: _ContactoTipo.existente, label: Text('Cliente')),
+                    ButtonSegment(value: _ContactoTipo.nuevo, label: Text('Nuevo')),
                     ButtonSegment(value: _ContactoTipo.otro, label: Text('Otro')),
                   ],
                   selected: {_contactoTipo},

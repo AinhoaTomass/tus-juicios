@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
 import '../domain/evento.dart';
@@ -48,6 +49,8 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
 
           final eventosSeleccionados = eventosDelDia(_diaSeleccionado);
 
+          final colores = AppTheme.of(context);
+
           return Column(
             children: [
               TableCalendar<Evento>(
@@ -65,13 +68,37 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                   });
                 },
                 onPageChanged: (enfocado) => _mesEnfocado = enfocado,
-                calendarStyle: const CalendarStyle(outsideDaysVisible: false),
+                // Colores del tema en vez del azul por defecto del paquete:
+                // hoy con un círculo dorado suave, el día elegido relleno.
+                calendarStyle: CalendarStyle(
+                  outsideDaysVisible: false,
+                  todayDecoration: BoxDecoration(
+                    color: colores.accent.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  todayTextStyle: TextStyle(
+                    color: colores.ink,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: colores.accentInk,
+                    shape: BoxShape.circle,
+                  ),
+                  selectedTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  markerDecoration: BoxDecoration(
+                    color: colores.accent,
+                    shape: BoxShape.circle,
+                  ),
+                ),
                 headerStyle: const HeaderStyle(formatButtonVisible: false),
               ),
               const Divider(height: 1),
               Expanded(
                 child: eventosSeleccionados.isEmpty
-                    ? const Center(child: Text('Sin eventos este día.'))
+                    ? const Center(child: Text('Sin citas este día.'))
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
                         itemCount: eventosSeleccionados.length,
@@ -89,7 +116,7 @@ class _AgendaScreenState extends ConsumerState<AgendaScreen> {
                                       Text(
                                         evento.clienteNombre ??
                                             evento.descripcion ??
-                                            'Evento personal',
+                                            'Cita personal',
                                         style: Theme.of(context).textTheme.titleMedium,
                                       ),
                                       if (evento.clienteNombre != null &&

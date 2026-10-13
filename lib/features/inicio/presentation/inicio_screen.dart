@@ -176,7 +176,7 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
               final deEventos = eventos.where((e) => esHoyOPosterior(e.fecha, ahora)).map<_ItemProximo>(
                     (e) => (
                       fecha: e.fecha,
-                      cliente: e.clienteNombre ?? e.descripcion ?? 'Evento personal',
+                      cliente: e.clienteNombre ?? e.descripcion ?? 'Cita personal',
                       subtitulo: '${e.fecha.day}/${e.fecha.month}/${e.fecha.year}'
                           '${e.hora != null ? ' · ${e.hora}' : ''}',
                       etiqueta: e.categoria == CategoriaEvento.despacho ? 'Despacho' : 'Personal',
