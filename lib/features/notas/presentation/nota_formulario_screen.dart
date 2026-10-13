@@ -96,6 +96,52 @@ class _NotaFormularioScreenState extends ConsumerState<NotaFormularioScreen> {
     }
   }
 
+  Future<void> _eliminar() async {
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Eliminar nota'),
+        content: Text(
+          '¿Seguro que quieres eliminar "${_tituloCtrl.text.trim()}"? '
+          'No se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmado != true || !mounted) return;
+
+    try {
+      await ref.read(notaRepositoryProvider).eliminarNota(widget.notaId!);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se pudo eliminar la nota: $e')),
+        );
+      }
+      return;
+    }
+    if (!mounted) return;
+
+    ref.read(formularioSucioProvider.notifier).limpiar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Nota eliminada')),
+    );
+    // Primero salir y luego refrescar, para que esta pantalla no intente
+    // volver a cargar una nota que ya no existe.
+    context.pop();
+    ref.invalidate(notasListaProvider);
+    if (_clienteId != null) ref.invalidate(notasDeClienteProvider(_clienteId!));
+  }
+
   @override
   Widget build(BuildContext context) {
     final esEdicion = widget.notaId != null;
@@ -129,7 +175,17 @@ class _NotaFormularioScreenState extends ConsumerState<NotaFormularioScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(esEdicion ? 'Editar nota' : 'Nueva nota')),
+        appBar: AppBar(
+          title: Text(esEdicion ? 'Editar nota' : 'Nueva nota'),
+          actions: [
+            if (esEdicion)
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                tooltip: 'Eliminar nota',
+                onPressed: _eliminar,
+              ),
+          ],
+        ),
         body: Form(
           key: _formKey,
           onChanged: _marcarSucio,
