@@ -35,9 +35,4 @@ class FacturaRepositorySupabase implements FacturaRepository {
         .single();
     return row.toFactura();
   }
-
-  @override
-  Future<void> eliminarFactura(String id) {
-    return _client.from('facturas').delete().eq('id', id);
-  }
 }
