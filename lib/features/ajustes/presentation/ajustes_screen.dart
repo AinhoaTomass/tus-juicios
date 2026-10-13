@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/network/supabase_client.dart';
 import '../../../core/widgets/responsive_content.dart';
+import '../../auth/presentation/cambiar_contrasena_dialog.dart';
 import '../domain/datos_despacho.dart';
 import '../domain/recordatorios_config.dart';
 import 'ajustes_providers.dart';
@@ -195,11 +197,55 @@ class AjustesScreen extends ConsumerWidget {
                 const Divider(),
                 const SizedBox(height: 16),
                 const _SeccionDatosDespacho(),
+                const SizedBox(height: 16),
+                const Divider(),
+                const SizedBox(height: 16),
+                const _SeccionCuenta(),
               ],
             );
           },
         ),
       ),
+    );
+  }
+}
+
+/// Email con el que se ha iniciado sesión y cambio de contraseña.
+class _SeccionCuenta extends StatelessWidget {
+  const _SeccionCuenta();
+
+  Future<void> _cambiarContrasena(BuildContext context) async {
+    final cambiada = await showDialog<bool>(
+      context: context,
+      builder: (context) => const CambiarContrasenaDialog(),
+    );
+    if (cambiada == true && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Contraseña cambiada')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Cuenta', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.person_outline),
+          title: Text(supabase.auth.currentUser?.email ?? ''),
+        ),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.lock_outline),
+          title: const Text('Cambiar contraseña'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => _cambiarContrasena(context),
+        ),
+      ],
     );
   }
 }

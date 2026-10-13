@@ -1,8 +1,12 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../core/auth/inactividad.dart';
 import '../../../core/network/supabase_client.dart';
+
+const _claveUltimoEmail = 'ultimo_email';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,13 +19,34 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
+  final _passwordFocus = FocusNode();
   bool _cargando = false;
   String? _error;
+  String? _aviso;
+
+  @override
+  void initState() {
+    super.initState();
+    if (sesionCerradaPorInactividad.value) {
+      _aviso = 'Sesión cerrada por inactividad';
+      sesionCerradaPorInactividad.value = false;
+    }
+    _cargarUltimoEmail();
+  }
+
+  Future<void> _cargarUltimoEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString(_claveUltimoEmail);
+    if (email == null || !mounted || _emailCtrl.text.isNotEmpty) return;
+    _emailCtrl.text = email;
+    _passwordFocus.requestFocus();
+  }
 
   @override
   void dispose() {
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -34,10 +59,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      final email = _emailCtrl.text.trim();
       await supabase.auth.signInWithPassword(
-        email: _emailCtrl.text.trim(),
+        email: email,
         password: _passwordCtrl.text,
       );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_claveUltimoEmail, email);
     } on AuthException catch (e) {
       setState(() => _error = e.message);
     } finally {
@@ -96,6 +124,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     'TusJuicios',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
+                  if (_aviso != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _aviso!,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _emailCtrl,
@@ -107,6 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordCtrl,
+                    focusNode: _passwordFocus,
                     decoration: const InputDecoration(labelText: 'Contraseña'),
                     obscureText: true,
                     validator: (value) =>
