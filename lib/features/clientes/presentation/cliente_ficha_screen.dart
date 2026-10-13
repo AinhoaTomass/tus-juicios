@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estado_chip.dart';
@@ -115,6 +116,10 @@ class ClienteFichaScreen extends ConsumerWidget {
                   if (cliente.resumen != null) ...[
                     const SizedBox(height: 12),
                     Text(cliente.resumen!),
+                  ],
+                  if (cliente.telefono != null || cliente.email != null) ...[
+                    const SizedBox(height: 16),
+                    _AccionesContacto(cliente: cliente),
                   ],
                   const SizedBox(height: 12),
                   const Divider(),
@@ -354,3 +359,72 @@ class ClienteFichaScreen extends ConsumerWidget {
   }
 }
 
+
+/// Botones para contactar con el cliente desde su ficha: llamar, email y
+/// WhatsApp. Solo aparecen los que tienen dato (teléfono o email).
+class _AccionesContacto extends StatelessWidget {
+  const _AccionesContacto({required this.cliente});
+
+  final Cliente cliente;
+
+  /// Teléfono en formato internacional sin "+" para wa.me. Un número
+  /// español de 9 cifras sin prefijo se asume +34.
+  static String _numeroWhatsApp(String telefono) {
+    var digitos = telefono.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitos.startsWith('00')) digitos = digitos.substring(2);
+    if (!telefono.trim().startsWith('+') && digitos.length == 9) {
+      digitos = '34$digitos';
+    }
+    return digitos;
+  }
+
+  Future<void> _abrir(BuildContext context, Uri uri, String que) async {
+    final messenger = ScaffoldMessenger.of(context);
+    var abierto = false;
+    try {
+      abierto = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {}
+    if (!abierto) {
+      messenger.showSnackBar(SnackBar(content: Text('No se pudo abrir $que')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final telefono = cliente.telefono;
+    final email = cliente.email;
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        if (telefono != null)
+          OutlinedButton.icon(
+            onPressed: () => _abrir(
+              context,
+              Uri(scheme: 'tel', path: telefono.replaceAll(RegExp(r'[^0-9+]'), '')),
+              'el teléfono',
+            ),
+            icon: const Icon(Icons.phone_outlined, size: 18),
+            label: const Text('Llamar'),
+          ),
+        if (telefono != null)
+          OutlinedButton.icon(
+            onPressed: () => _abrir(
+              context,
+              Uri.https('wa.me', '/${_numeroWhatsApp(telefono)}'),
+              'WhatsApp',
+            ),
+            icon: const Icon(Icons.chat_outlined, size: 18),
+            label: const Text('WhatsApp'),
+          ),
+        if (email != null)
+          OutlinedButton.icon(
+            onPressed: () => _abrir(context, Uri(scheme: 'mailto', path: email), 'el email'),
+            icon: const Icon(Icons.email_outlined, size: 18),
+            label: const Text('Email'),
+          ),
+      ],
+    );
+  }
+}

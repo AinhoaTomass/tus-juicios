@@ -15,6 +15,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.ink,
     required this.hairline,
     required this.mutedInk,
+    required this.exito,
+    required this.urgente,
   });
 
   final Color accent;
@@ -33,6 +35,11 @@ class AppColors extends ThemeExtension<AppColors> {
   /// que [ink] pero más suave, para distinguirlo del título principal.
   final Color mutedInk;
 
+  /// Verde y rojo de los estados (pagada/presentada, vencida/urgente).
+  /// Más claros en oscuro para mantener contraste 4,5:1 sobre la superficie.
+  final Color exito;
+  final Color urgente;
+
   static const light = AppColors(
     accent: Color(0xFFB68235),
     accentInk: Color(0xFF8F6324),
@@ -41,6 +48,8 @@ class AppColors extends ThemeExtension<AppColors> {
     ink: Color(0xFF2A2622),
     hairline: Color(0xFFD8CFC2),
     mutedInk: Color(0xFF74695C),
+    exito: Color(0xFF3F7D4F),
+    urgente: Color(0xFFB33A3A),
   );
 
   static const dark = AppColors(
@@ -51,6 +60,8 @@ class AppColors extends ThemeExtension<AppColors> {
     ink: Color(0xFFEDE6DC),
     hairline: Color(0xFF463F37),
     mutedInk: Color(0xFFA89A88),
+    exito: Color(0xFF7FB58C),
+    urgente: Color(0xFFE08A80),
   );
 
   @override
@@ -62,6 +73,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? ink,
     Color? hairline,
     Color? mutedInk,
+    Color? exito,
+    Color? urgente,
   }) {
     return AppColors(
       accent: accent ?? this.accent,
@@ -71,6 +84,8 @@ class AppColors extends ThemeExtension<AppColors> {
       ink: ink ?? this.ink,
       hairline: hairline ?? this.hairline,
       mutedInk: mutedInk ?? this.mutedInk,
+      exito: exito ?? this.exito,
+      urgente: urgente ?? this.urgente,
     );
   }
 
@@ -85,6 +100,8 @@ class AppColors extends ThemeExtension<AppColors> {
       ink: Color.lerp(ink, other.ink, t)!,
       hairline: Color.lerp(hairline, other.hairline, t)!,
       mutedInk: Color.lerp(mutedInk, other.mutedInk, t)!,
+      exito: Color.lerp(exito, other.exito, t)!,
+      urgente: Color.lerp(urgente, other.urgente, t)!,
     );
   }
 }
