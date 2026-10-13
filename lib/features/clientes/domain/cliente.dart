@@ -14,7 +14,6 @@ class Cliente {
     this.email,
     this.direccion,
     this.resumen,
-    this.fechaVencimiento,
     this.notas,
     this.eliminadoEn,
     this.procedimientos = const [],
@@ -28,18 +27,11 @@ class Cliente {
   final String? email;
   final String? direccion;
   final String? resumen;
-  final DateTime? fechaVencimiento;
   final String? notas;
 
   /// Si no es nulo, el cliente está en la papelera desde esa fecha.
   final DateTime? eliminadoEn;
   final List<Procedimiento> procedimientos;
-
-  /// Urgente si vence en 3 días o menos (o ya ha vencido).
-  bool get esUrgente => esUrgenteEn(DateTime.now());
-
-  bool esUrgenteEn(DateTime hoy) =>
-      fechaVencimiento != null && diasHasta(fechaVencimiento!, hoy) <= 3;
 
   /// Solo tiene el nombre (p.ej. dado de alta rápida desde un evento de
   /// agenda): faltan sus datos de contacto por completar.

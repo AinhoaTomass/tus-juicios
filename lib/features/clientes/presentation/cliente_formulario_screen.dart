@@ -28,7 +28,6 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
   final _resumenCtrl = TextEditingController();
   final _notasCtrl = TextEditingController();
   TipoCliente _tipo = TipoCliente.fisica;
-  DateTime? _fechaVencimiento;
   bool _cargado = false;
 
   @override
@@ -63,7 +62,6 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
     _resumenCtrl.text = cliente.resumen ?? '';
     _notasCtrl.text = cliente.notas ?? '';
     _tipo = cliente.tipo;
-    _fechaVencimiento = cliente.fechaVencimiento;
     _cargado = true;
   }
 
@@ -80,7 +78,6 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
       email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
       direccion: _direccionCtrl.text.trim().isEmpty ? null : _direccionCtrl.text.trim(),
       resumen: _resumenCtrl.text.trim().isEmpty ? null : _resumenCtrl.text.trim(),
-      fechaVencimiento: _fechaVencimiento,
       notas: _notasCtrl.text.trim().isEmpty ? null : _notasCtrl.text.trim(),
     );
 

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/filtro_chips.dart';
 import '../../../core/widgets/hairline_card.dart';
 import '../domain/cliente.dart';
@@ -153,8 +152,6 @@ class _ClienteCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
               ],
-              if (cliente.esUrgente)
-                const EstadoChip(label: 'Urgente', tono: EstadoTono.urgente),
             ],
           ),
           const SizedBox(height: 4),
@@ -168,19 +165,6 @@ class _ClienteCard extends StatelessWidget {
           if (cliente.resumen != null) ...[
             const SizedBox(height: 6),
             Text(cliente.resumen!, style: textTheme.bodyMedium),
-          ],
-          if (cliente.fechaVencimiento != null) ...[
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                Icon(Icons.event_outlined, size: 16, color: AppTheme.of(context).mutedInk),
-                const SizedBox(width: 6),
-                Text(
-                  'Vence ${cliente.fechaVencimiento!.day}/${cliente.fechaVencimiento!.month}',
-                  style: textTheme.bodySmall,
-                ),
-              ],
-            ),
           ],
         ],
       ),

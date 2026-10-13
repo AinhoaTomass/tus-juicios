@@ -2,28 +2,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tusjuicios/features/clientes/domain/cliente.dart';
 import 'package:tusjuicios/features/clientes/domain/contacto.dart';
 
-Cliente _cliente({DateTime? vence, String? telefono}) => Cliente(
+Cliente _cliente({String? telefono}) => Cliente(
       id: '1',
       nombre: 'Ana',
       tipo: TipoCliente.fisica,
-      fechaVencimiento: vence,
       telefono: telefono,
     );
 
 void main() {
   final hoy = DateTime(2026, 10, 13, 10);
-
-  group('Cliente.esUrgenteEn', () {
-    test('urgente si vence en 3 días o menos, o ya venció', () {
-      expect(_cliente(vence: DateTime(2026, 10, 16)).esUrgenteEn(hoy), isTrue);
-      expect(_cliente(vence: DateTime(2026, 10, 1)).esUrgenteEn(hoy), isTrue);
-    });
-
-    test('no urgente a 4 días ni sin fecha', () {
-      expect(_cliente(vence: DateTime(2026, 10, 17)).esUrgenteEn(hoy), isFalse);
-      expect(_cliente().esUrgenteEn(hoy), isFalse);
-    });
-  });
 
   test('datos incompletos si solo tiene el nombre', () {
     expect(_cliente().datosIncompletos, isTrue);

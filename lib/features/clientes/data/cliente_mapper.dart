@@ -11,9 +11,6 @@ extension ClienteMapper on Map<String, dynamic> {
         email: this['email'] as String?,
         direccion: this['direccion'] as String?,
         resumen: this['resumen'] as String?,
-        fechaVencimiento: this['fecha_vencimiento'] == null
-            ? null
-            : leerFecha(this['fecha_vencimiento'] as String),
         notas: this['notas'] as String?,
         eliminadoEn: this['eliminado_en'] == null
             ? null
@@ -30,7 +27,6 @@ extension ClienteToRow on Cliente {
         'email': email,
         'direccion': direccion,
         'resumen': resumen,
-        'fecha_vencimiento': fechaVencimiento == null ? null : fechaParaBd(fechaVencimiento!),
         'notas': notas,
       };
 }

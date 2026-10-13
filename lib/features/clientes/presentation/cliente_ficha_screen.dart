@@ -105,8 +105,6 @@ class ClienteFichaScreen extends ConsumerWidget {
                         ),
                         const SizedBox(width: 8),
                       ],
-                      if (cliente.esUrgente)
-                        const EstadoChip(label: 'Urgente', tono: EstadoTono.urgente),
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -161,16 +159,6 @@ class ClienteFichaScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                   ],
-                  if (cliente.fechaVencimiento != null)
-                    Row(
-                      children: [
-                        const Icon(Icons.event_outlined, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Vence: ${cliente.fechaVencimiento!.day}/${cliente.fechaVencimiento!.month}/${cliente.fechaVencimiento!.year}',
-                        ),
-                      ],
-                    ),
                   if (cliente.notas != null) ...[
                     const SizedBox(height: 12),
                     Text('Notas', style: Theme.of(context).textTheme.titleSmall),
