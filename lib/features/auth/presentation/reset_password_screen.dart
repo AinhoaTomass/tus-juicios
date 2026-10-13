@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/network/supabase_client.dart';
+import '../domain/politica_contrasena.dart';
 
 /// Pantalla a la que llega el usuario tras tocar el enlace de recuperación
 /// de contraseña recibido por email. Supabase ya ha abierto una sesión
@@ -70,13 +71,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _passwordCtrl,
-                    decoration: const InputDecoration(labelText: 'Nueva contraseña'),
+                    decoration: const InputDecoration(
+                      labelText: 'Nueva contraseña',
+                      helperText: ayudaContrasena,
+                      helperMaxLines: 2,
+                      errorMaxLines: 2,
+                    ),
                     obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) return 'Obligatorio';
-                      if (value.length < 6) return 'Mínimo 6 caracteres';
-                      return null;
-                    },
+                    validator: validarContrasenaNueva,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(

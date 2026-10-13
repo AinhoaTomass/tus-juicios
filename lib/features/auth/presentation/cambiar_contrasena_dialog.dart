@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/network/supabase_client.dart';
+import '../domain/politica_contrasena.dart';
 
 /// Cambio de contraseña con la sesión iniciada. Pide la contraseña actual
 /// para que nadie pueda cambiarla con el móvil desbloqueado.
@@ -88,11 +89,14 @@ class _CambiarContrasenaDialogState extends State<CambiarContrasenaDialog> {
                 controller: _nuevaCtrl,
                 decoration: const InputDecoration(
                   labelText: 'Nueva contraseña',
+                  helperText: ayudaContrasena,
+                  helperMaxLines: 2,
+                  errorMaxLines: 2,
                 ),
                 obscureText: true,
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Obligatorio';
-                  if (value.length < 6) return 'Mínimo 6 caracteres';
+                  final error = validarContrasenaNueva(value);
+                  if (error != null) return error;
                   if (value == _actualCtrl.text) {
                     return 'Debe ser distinta de la actual';
                   }
