@@ -2,14 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/widgets/hairline_card.dart';
+import '../../../core/widgets/mostrar_error.dart';
+import '../../agenda/presentation/eventos_providers.dart';
+import '../../notas/presentation/notas_providers.dart';
+import '../../rentas/presentation/rentas_providers.dart';
 import '../domain/cliente.dart';
+import '../domain/cliente_repository.dart';
 import 'clientes_providers.dart';
+import 'procedimientos_providers.dart';
 
 class PapeleraScreen extends ConsumerWidget {
   const PapeleraScreen({super.key});
 
   Future<void> _restaurar(BuildContext context, WidgetRef ref, Cliente cliente) async {
-    await ref.read(clienteRepositoryProvider).restaurarDePapelera(cliente.id);
+    try {
+      await ref.read(clienteRepositoryProvider).restaurarDePapelera(cliente.id);
+    } catch (error) {
+      if (context.mounted) mostrarError(context, 'No se pudo restaurar el cliente', error);
+      return;
+    }
     ref.invalidate(clientesPapeleraProvider);
     ref.invalidate(clientesListaProvider);
     if (context.mounted) {
@@ -25,8 +36,9 @@ class PapeleraScreen extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Text('Eliminar definitivamente'),
         content: Text(
-          '"${cliente.nombre}" se borrará para siempre, junto con sus procedimientos y '
-          'documentos. Esta acción no se puede deshacer. ¿Continuar?',
+          '"${cliente.nombre}" se borrará para siempre, junto con sus procedimientos, '
+          'rentas, citas y documentos (también los archivos). Esta acción no se puede '
+          'deshacer. ¿Continuar?',
         ),
         actions: [
           TextButton(
@@ -42,8 +54,44 @@ class PapeleraScreen extends ConsumerWidget {
     );
     if (confirmar != true) return;
 
-    await ref.read(clienteRepositoryProvider).eliminarCliente(cliente.id);
+    try {
+      await ref.read(clienteRepositoryProvider).eliminarCliente(cliente.id);
+    } on ClienteConFacturasException catch (error) {
+      if (context.mounted) {
+        await showDialog<void>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('No se puede eliminar'),
+            content: Text(
+              '"${cliente.nombre}" no se puede eliminar definitivamente. $error\n\n'
+              'Puedes dejarlo en la papelera (no aparece en la lista de clientes) '
+              'o restaurarlo.',
+            ),
+            actions: [
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Entendido'),
+              ),
+            ],
+          ),
+        );
+      }
+      return;
+    } catch (error) {
+      if (context.mounted) mostrarError(context, 'No se pudo eliminar el cliente', error);
+      return;
+    }
     ref.invalidate(clientesPapeleraProvider);
+    // Sus procedimientos, rentas y citas también han desaparecido.
+    ref.invalidate(procedimientosListaProvider);
+    ref.invalidate(rentasListaProvider);
+    ref.invalidate(eventosListaProvider);
+    ref.invalidate(notasListaProvider);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${cliente.nombre} eliminado definitivamente')),
+      );
+    }
   }
 
   @override

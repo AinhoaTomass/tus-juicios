@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
+import '../../../core/widgets/mostrar_error.dart';
 import '../domain/cliente.dart';
 import 'documentos_providers.dart';
 import 'procedimientos_providers.dart';
@@ -82,10 +83,15 @@ class _ProcedimientoFormularioScreenState extends ConsumerState<ProcedimientoFor
       fechaMeta: _fechaMeta,
     );
 
-    if (widget.procedimientoId == null) {
-      await repo.crearProcedimiento(procedimiento);
-    } else {
-      await repo.actualizarProcedimiento(procedimiento);
+    try {
+      if (widget.procedimientoId == null) {
+        await repo.crearProcedimiento(procedimiento);
+      } else {
+        await repo.actualizarProcedimiento(procedimiento);
+      }
+    } catch (error) {
+      if (mounted) mostrarError(context, 'No se pudo guardar el procedimiento', error);
+      return;
     }
 
     ref.invalidate(procedimientosDeClienteProvider(widget.clienteId));

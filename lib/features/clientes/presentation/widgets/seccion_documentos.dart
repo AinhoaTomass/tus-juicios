@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/hairline_card.dart';
+import '../../../../core/widgets/mostrar_error.dart';
 import '../../domain/documento.dart';
 import '../documentos_providers.dart';
 
@@ -113,7 +114,12 @@ class _SeccionDocumentosState extends ConsumerState<SeccionDocumentos> {
     );
     if (confirmar != true) return;
 
-    await ref.read(documentoRepositoryProvider).eliminarDocumento(documento);
+    try {
+      await ref.read(documentoRepositoryProvider).eliminarDocumento(documento);
+    } catch (error) {
+      if (mounted) mostrarError(context, 'No se pudo eliminar el documento', error);
+      return;
+    }
     widget.onCambio(documento.procedimientoId);
   }
 

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
+import '../../../core/widgets/mostrar_error.dart';
 import '../domain/nota.dart';
 import 'notas_providers.dart';
 
@@ -79,10 +80,15 @@ class _NotaFormularioScreenState extends ConsumerState<NotaFormularioScreen> {
       clienteId: _clienteId,
     );
 
-    if (widget.notaId == null) {
-      await repo.crearNota(nota);
-    } else {
-      await repo.actualizarNota(nota);
+    try {
+      if (widget.notaId == null) {
+        await repo.crearNota(nota);
+      } else {
+        await repo.actualizarNota(nota);
+      }
+    } catch (error) {
+      if (mounted) mostrarError(context, 'No se pudo guardar la nota', error);
+      return;
     }
 
     ref.invalidate(notasListaProvider);
@@ -121,12 +127,8 @@ class _NotaFormularioScreenState extends ConsumerState<NotaFormularioScreen> {
 
     try {
       await ref.read(notaRepositoryProvider).eliminarNota(widget.notaId!);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo eliminar la nota: $e')),
-        );
-      }
+    } catch (error) {
+      if (mounted) mostrarError(context, 'No se pudo eliminar la nota', error);
       return;
     }
     if (!mounted) return;

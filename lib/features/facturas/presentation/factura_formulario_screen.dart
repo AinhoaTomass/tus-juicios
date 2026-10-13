@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
+import '../../../core/widgets/mostrar_error.dart';
 import '../../clientes/presentation/clientes_providers.dart';
 import '../domain/factura.dart';
 import 'facturas_providers.dart';
@@ -95,11 +96,7 @@ class _FacturaFormularioScreenState extends ConsumerState<FacturaFormularioScree
         await repo.actualizarFactura(factura);
       }
     } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar la factura: $error')),
-        );
-      }
+      if (mounted) mostrarError(context, 'No se pudo guardar la factura', error);
       return;
     }
 

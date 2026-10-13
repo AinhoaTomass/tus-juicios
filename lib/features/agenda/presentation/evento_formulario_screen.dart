@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
+import '../../../core/widgets/mostrar_error.dart';
 import '../../clientes/domain/cliente.dart';
 import '../../clientes/presentation/clientes_providers.dart';
 import '../domain/evento.dart';
@@ -129,11 +130,7 @@ class _EventoFormularioScreenState extends ConsumerState<EventoFormularioScreen>
         await repo.actualizarEvento(evento);
       }
     } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar el evento: $error')),
-        );
-      }
+      if (mounted) mostrarError(context, 'No se pudo guardar el evento', error);
       return;
     }
 

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
+import '../../../core/widgets/mostrar_error.dart';
 import '../domain/cliente.dart';
 import 'clientes_providers.dart';
 
@@ -83,10 +84,15 @@ class _ClienteFormularioScreenState extends ConsumerState<ClienteFormularioScree
       notas: _notasCtrl.text.trim().isEmpty ? null : _notasCtrl.text.trim(),
     );
 
-    if (widget.clienteId == null) {
-      await repo.crearCliente(cliente);
-    } else {
-      await repo.actualizarCliente(cliente);
+    try {
+      if (widget.clienteId == null) {
+        await repo.crearCliente(cliente);
+      } else {
+        await repo.actualizarCliente(cliente);
+      }
+    } catch (error) {
+      if (mounted) mostrarError(context, 'No se pudo guardar el cliente', error);
+      return;
     }
 
     ref.invalidate(clientesListaProvider);

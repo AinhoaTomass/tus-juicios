@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/hairline_card.dart';
+import '../../../core/widgets/mostrar_error.dart';
 import '../../notas/presentation/notas_providers.dart';
 import '../domain/cliente.dart';
 import 'clientes_providers.dart';
@@ -46,7 +47,12 @@ class ClienteFichaScreen extends ConsumerWidget {
     );
     if (confirmar != true) return;
 
-    await ref.read(clienteRepositoryProvider).moverAPapelera(cliente.id);
+    try {
+      await ref.read(clienteRepositoryProvider).moverAPapelera(cliente.id);
+    } catch (error) {
+      if (context.mounted) mostrarError(context, 'No se pudo mover a la papelera', error);
+      return;
+    }
     ref.invalidate(clientesListaProvider);
     if (context.mounted) context.pop();
   }

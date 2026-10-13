@@ -67,7 +67,34 @@ class ClienteRepositorySupabase implements ClienteRepository {
   }
 
   @override
-  Future<void> eliminarCliente(String id) {
-    return _client.from('clientes').delete().eq('id', id);
+  Future<void> eliminarCliente(String id) async {
+    final facturas = await _client
+        .from('facturas')
+        .select('id')
+        .eq('cliente_id', id)
+        .count(CountOption.exact);
+    if (facturas.count > 0) throw ClienteConFacturasException(facturas.count);
+
+    // Las filas de `documentos` se borran en cascada con el cliente, pero
+    // los archivos de Storage no: hay que guardarse sus rutas antes.
+    final documentos = await _client
+        .from('documentos')
+        .select('storage_path')
+        .eq('cliente_id', id);
+    final rutas = [for (final d in documentos) d['storage_path'] as String];
+
+    try {
+      await _client.from('clientes').delete().eq('id', id);
+    } on PostgrestException catch (e) {
+      // 23503: violación de clave foránea (facturas creadas entre medias).
+      if (e.code == '23503') throw const ClienteConFacturasException();
+      rethrow;
+    }
+
+    // Storage admite como mucho 1000 rutas por llamada.
+    for (var i = 0; i < rutas.length; i += 1000) {
+      final lote = rutas.sublist(i, i + 1000 > rutas.length ? rutas.length : i + 1000);
+      await _client.storage.from('documentos').remove(lote);
+    }
   }
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/state/formulario_sucio_provider.dart';
 import '../../../core/widgets/confirmar_salida_dialog.dart';
+import '../../../core/widgets/mostrar_error.dart';
 import '../../clientes/presentation/clientes_providers.dart';
 import '../domain/renta.dart';
 import 'rentas_providers.dart';
@@ -82,10 +83,15 @@ class _RentaFormularioScreenState extends ConsumerState<RentaFormularioScreen> {
       fecha: _fecha,
     );
 
-    if (widget.rentaId == null) {
-      await repo.crearRenta(renta);
-    } else {
-      await repo.actualizarRenta(renta);
+    try {
+      if (widget.rentaId == null) {
+        await repo.crearRenta(renta);
+      } else {
+        await repo.actualizarRenta(renta);
+      }
+    } catch (error) {
+      if (mounted) mostrarError(context, 'No se pudo guardar la renta', error);
+      return;
     }
 
     ref.invalidate(rentasListaProvider);
