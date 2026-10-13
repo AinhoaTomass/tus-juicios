@@ -37,10 +37,20 @@ class _ClientesListaScreenState extends ConsumerState<ClientesListaScreen> {
       appBar: AppBar(
         title: const Text('Clientes'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            tooltip: 'Papelera',
-            onPressed: () => context.push('/clientes/papelera'),
+          // En un menú y no como icono suelto: el icono de papelera ya
+          // significa "borrar" en la ficha del cliente.
+          PopupMenuButton<void>(
+            tooltip: 'Más opciones',
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                onTap: () => context.push('/clientes/papelera'),
+                child: const ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(Icons.restore_from_trash_outlined),
+                  title: Text('Papelera'),
+                ),
+              ),
+            ],
           ),
         ],
       ),

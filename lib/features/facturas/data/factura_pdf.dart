@@ -4,6 +4,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../../core/formato/importe.dart';
 import '../../ajustes/domain/datos_despacho.dart';
 import '../domain/factura.dart';
 
@@ -88,7 +89,7 @@ Future<Uint8List> generarFacturaPdf(Factura factura, DatosDespacho despacho) asy
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(8),
                       child: pw.Text(
-                        '${factura.importe.toStringAsFixed(2)} €',
+                        formatearImporte(factura.importe),
                         textAlign: pw.TextAlign.right,
                       ),
                     ),
@@ -101,7 +102,7 @@ Future<Uint8List> generarFacturaPdf(Factura factura, DatosDespacho despacho) asy
               mainAxisAlignment: pw.MainAxisAlignment.end,
               children: [
                 pw.Text(
-                  'Total: ${factura.importe.toStringAsFixed(2)} €',
+                  'Total: ${formatearImporte(factura.importe)}',
                   style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
                 ),
               ],

@@ -12,7 +12,9 @@ import '../state/formulario_sucio_provider.dart';
 import '../widgets/confirmar_salida_dialog.dart';
 import '../widgets/responsive_content.dart';
 
-/// Shell con las 6 secciones del prototipo. En móvil se muestra como barra
+/// Shell con 5 secciones (Notas queda fuera para no saturar la barra
+/// inferior; se abre desde Inicio o el panel lateral, y desde la ficha de
+/// cada cliente). En móvil se muestra como barra
 /// de navegación inferior; en pantallas anchas (tablet/escritorio) pasa a un
 /// panel lateral (que se puede esconder) y el contenido se centra con un
 /// ancho máximo. El layout master-detail de Clientes en tablet se resuelve
@@ -36,11 +38,6 @@ class _AppShellState extends ConsumerState<AppShell> {
       icon: Icons.receipt_long_outlined,
       iconSeleccionado: Icons.receipt_long,
       label: 'Facturas',
-    ),
-    (
-      icon: Icons.sticky_note_2_outlined,
-      iconSeleccionado: Icons.sticky_note_2,
-      label: 'Notas',
     ),
   ];
 
@@ -121,6 +118,11 @@ class _AppShellState extends ConsumerState<AppShell> {
                   child: Wrap(
                     alignment: WrapAlignment.center,
                     children: [
+                      IconButton(
+                        icon: const Icon(Icons.sticky_note_2_outlined),
+                        tooltip: 'Notas',
+                        onPressed: () => context.push('/notas'),
+                      ),
                       IconButton(
                         icon: const Icon(Icons.settings_outlined),
                         tooltip: 'Ajustes',

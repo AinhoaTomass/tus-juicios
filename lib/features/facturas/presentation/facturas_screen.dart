@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 
+import '../../../core/formato/importe.dart';
 import '../../../core/widgets/estado_chip.dart';
 import '../../../core/widgets/filtro_chips.dart';
 import '../../../core/widgets/hairline_card.dart';
@@ -70,11 +71,11 @@ class _FacturasScreenState extends ConsumerState<FacturasScreen> {
                 StatTileGrid(
                   tiles: [
                     StatTile(
-                      valor: '${facturado.toStringAsFixed(0)} €',
+                      valor: formatearImporte(facturado, decimales: false),
                       etiqueta: 'Facturado $anio',
                     ),
                     StatTile(
-                      valor: '${pendienteCobro.toStringAsFixed(0)} €',
+                      valor: formatearImporte(pendienteCobro, decimales: false),
                       etiqueta: 'Pendiente de cobro',
                     ),
                     StatTile(
@@ -148,7 +149,7 @@ class _FacturasScreenState extends ConsumerState<FacturasScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  '${factura.importe.toStringAsFixed(2)} €',
+                                  formatearImporte(factura.importe),
                                   style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                                 Text(

@@ -54,6 +54,25 @@ GoRouter appRouter(Ref ref) {
         path: '/procedimientos',
         builder: (context, state) => const ProcedimientosListaScreen(),
       ),
+      // Fuera de la barra inferior (para dejarla en 5 pestañas): se abre con
+      // push desde Inicio o el panel lateral, y sus pantallas hijas también
+      // con push para poder volver atrás.
+      GoRoute(
+        path: '/notas',
+        builder: (context, state) => const NotasScreen(),
+        routes: [
+          GoRoute(
+            path: 'nuevo',
+            builder: (context, state) => const NotaFormularioScreen(),
+          ),
+          GoRoute(
+            path: ':notaId/editar',
+            builder: (context, state) => NotaFormularioScreen(
+              notaId: state.pathParameters['notaId'],
+            ),
+          ),
+        ],
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, shell) => AppShell(shell: shell),
         branches: [
@@ -173,26 +192,6 @@ GoRouter appRouter(Ref ref) {
                     path: ':facturaId/editar',
                     builder: (context, state) => FacturaFormularioScreen(
                       facturaId: state.pathParameters['facturaId'],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/notas',
-                builder: (context, state) => const NotasScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'nuevo',
-                    builder: (context, state) => const NotaFormularioScreen(),
-                  ),
-                  GoRoute(
-                    path: ':notaId/editar',
-                    builder: (context, state) => NotaFormularioScreen(
-                      notaId: state.pathParameters['notaId'],
                     ),
                   ),
                 ],

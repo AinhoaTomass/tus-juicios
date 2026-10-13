@@ -18,7 +18,7 @@ class NotasScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Notas')),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/notas/nuevo'),
+        onPressed: () => context.push('/notas/nuevo'),
         icon: const Icon(Icons.add),
         label: const Text('Nueva nota'),
       ),
@@ -42,7 +42,7 @@ class NotasScreen extends ConsumerWidget {
                     (nota) => Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: HairlineCard(
-                        onTap: () => context.go('/notas/${nota.id}/editar'),
+                        onTap: () => context.push('/notas/${nota.id}/editar'),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

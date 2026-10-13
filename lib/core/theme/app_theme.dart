@@ -89,9 +89,11 @@ class AppColors extends ThemeExtension<AppColors> {
   }
 }
 
-/// Tema "Classical": tipografía serif (Cormorant Garamond para títulos,
-/// Lora para cuerpo), acento dorado, bordes finos sin relleno. Con versión
-/// clara y oscura; los colores concretos viven en [AppColors].
+/// Tema "Classical": Cormorant Garamond (serif) para títulos de pantalla y
+/// cabeceras; Inter (sans) para listas, datos, importes y formularios, con
+/// cifras tabulares para que los números se alineen en columna. Acento
+/// dorado y bordes finos. Con versión clara y oscura; los colores
+/// concretos viven en [AppColors].
 abstract final class AppTheme {
   /// Colores de la paleta activa (clara u oscura según el tema del sistema)
   /// para widgets que necesitan un color fuera de [ColorScheme].
@@ -122,7 +124,8 @@ abstract final class AppTheme {
     );
 
     final displayFont = GoogleFonts.cormorantGaramondTextTheme(base.textTheme);
-    final bodyFont = GoogleFonts.loraTextTheme(base.textTheme);
+    final bodyFont = GoogleFonts.interTextTheme(base.textTheme);
+    const cifras = [FontFeature.tabularFigures()];
 
     final textTheme = bodyFont.copyWith(
       displayLarge: displayFont.displayLarge?.copyWith(fontSize: 44, color: colors.ink),
@@ -140,26 +143,30 @@ abstract final class AppTheme {
         fontWeight: FontWeight.w600,
         color: colors.ink,
       ),
-      titleMedium: displayFont.titleMedium?.copyWith(
-        fontSize: 19,
-        fontWeight: FontWeight.w600,
-        color: colors.ink,
-      ),
-      titleSmall: displayFont.titleSmall?.copyWith(
+      // Nombres en tarjetas de listas y cabeceras de sección: en sans, que a
+      // este tamaño se lee mejor que la serif fina en el móvil.
+      titleMedium: bodyFont.titleMedium?.copyWith(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: colors.ink,
+        fontFeatures: cifras,
       ),
-      bodyLarge: bodyFont.bodyLarge?.copyWith(fontSize: 17, color: colors.ink),
-      bodyMedium: bodyFont.bodyMedium?.copyWith(fontSize: 15, color: colors.ink),
-      bodySmall: bodyFont.bodySmall?.copyWith(fontSize: 13.5, color: colors.mutedInk),
+      titleSmall: bodyFont.titleSmall?.copyWith(
+        fontSize: 14.5,
+        fontWeight: FontWeight.w600,
+        color: colors.ink,
+        fontFeatures: cifras,
+      ),
+      bodyLarge: bodyFont.bodyLarge?.copyWith(fontSize: 16, color: colors.ink, fontFeatures: cifras),
+      bodyMedium: bodyFont.bodyMedium?.copyWith(fontSize: 14.5, color: colors.ink, fontFeatures: cifras),
+      bodySmall: bodyFont.bodySmall?.copyWith(fontSize: 13, color: colors.mutedInk, fontFeatures: cifras),
       labelLarge: bodyFont.labelLarge?.copyWith(
         fontSize: 15,
         fontWeight: FontWeight.w600,
         color: colors.ink,
       ),
-      labelMedium: bodyFont.labelMedium?.copyWith(fontSize: 13, color: colors.mutedInk),
-      labelSmall: bodyFont.labelSmall?.copyWith(fontSize: 12, color: colors.mutedInk),
+      labelMedium: bodyFont.labelMedium?.copyWith(fontSize: 12.5, color: colors.mutedInk, fontFeatures: cifras),
+      labelSmall: bodyFont.labelSmall?.copyWith(fontSize: 11.5, color: colors.mutedInk, fontFeatures: cifras),
     );
 
     final thinBorder = BorderSide(color: colors.hairline, width: 1);

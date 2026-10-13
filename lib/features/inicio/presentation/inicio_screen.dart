@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/formato/importe.dart';
 import '../../../core/network/supabase_client.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/contador_badge.dart';
@@ -90,6 +91,11 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
             ? null
             : [
                 IconButton(
+                  icon: const Icon(Icons.sticky_note_2_outlined),
+                  tooltip: 'Notas',
+                  onPressed: () => context.push('/notas'),
+                ),
+                IconButton(
                   icon: const Icon(Icons.settings_outlined),
                   tooltip: 'Ajustes',
                   onPressed: () => context.push('/ajustes'),
@@ -161,12 +167,12 @@ class _InicioScreenState extends ConsumerState<InicioScreen> {
                 onTap: () => context.go('/agenda'),
               ),
               StatTile(
-                valor: '${cobradoEsteMes.toStringAsFixed(0)} €',
+                valor: formatearImporte(cobradoEsteMes, decimales: false),
                 etiqueta: 'Cobrado este mes',
                 onTap: () => context.go('/facturas'),
               ),
               StatTile(
-                valor: '${pendienteCobro.toStringAsFixed(0)} €',
+                valor: formatearImporte(pendienteCobro, decimales: false),
                 etiqueta: 'Pendiente de cobro',
                 onTap: () => context.go('/facturas'),
               ),

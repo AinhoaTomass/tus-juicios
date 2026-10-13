@@ -20,7 +20,14 @@ class StatTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(valor, style: Theme.of(context).textTheme.headlineSmall),
+          // Cifras en sans (no en la serif de títulos) para que importes y
+          // contadores se lean de un vistazo.
+          Text(
+            valor,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 22),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           const SizedBox(height: 2),
           Text(
             etiqueta,
